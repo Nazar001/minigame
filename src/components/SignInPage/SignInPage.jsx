@@ -31,16 +31,21 @@ class SignInPage extends Component {
         let reg = 0;
         db.forEach(el => {
             if (temp[0].value === el.login) {
-                reg = 1;
                 if (temp[1].value === el.password) {
-                    this.props.history.push('signUp');
+                    reg = 1;
                 } else {
-                    message.error('You have entered the wrong password!');
+                    reg = 2;
                 }
-            } else {
-                message.error('You have entered the wrong login!');
             };
         });
+        if(reg === 1) {
+            this.props.history.push('MainPage');
+        } else if (reg === 2) {
+            message.error('You have entered the wrong password!');
+        } else {
+            message.error('You have entered the wrong login!');
+        }
+        
     };
     
     handleSignUp = () => {
