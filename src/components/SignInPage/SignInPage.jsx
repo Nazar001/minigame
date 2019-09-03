@@ -2,9 +2,6 @@ import React, { Component } from 'react';
 import { withRouter } from "react-router";
 import { Form, Icon, Input, Button, message } from 'antd';
 import './SignInPage.scss';
-const error = () => {
-    message.error('This is an error message');
-};
 
 class SignInPage extends Component {
     constructor(props) {
@@ -27,24 +24,35 @@ class SignInPage extends Component {
         }
     }
 
-    handleSubmit = (e) => {
+    handleSignIn = (e) => {
         e.preventDefault();
         let temp = e.target;
         let db = this.state.DataBase;
+        let reg = 0;
         db.forEach(el => {
-            debugger
-            if(temp[0].value === el.login){
-                return {error};
+            if (temp[0].value === el.login) {
+                reg = 1;
+                if (temp[1].value === el.password) {
+                    this.props.history.push('signUp');
+                } else {
+                    message.error('You have entered the wrong password!');
+                }
+            } else {
+                message.error('You have entered the wrong login!');
             };
         });
-    }
+    };
+    
+    handleSignUp = () => {
+        this.props.history.push('signUp');
+    };
 
     render() {
         const { getFieldDecorator } = this.props.form;
         return (
             <div className="center">
                 <div className="sign-in-form">
-                    <Form onSubmit={this.handleSubmit} className="login-form">
+                    <Form onSubmit={this.handleSignIn} className="login-form">
                         <Form.Item>
                             {getFieldDecorator('username', {
                                 rules: [{ required: true, message: 'Please input your username!' }],
@@ -67,7 +75,7 @@ class SignInPage extends Component {
                             )}
                         </Form.Item>
                         <Form.Item className="gor-center">
-                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button> Or <a href="">register now!</a>
+                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button> Or <a onClick={this.handleSignUp}>register now!</a>
                         </Form.Item>
                     </Form>
                 </div>
