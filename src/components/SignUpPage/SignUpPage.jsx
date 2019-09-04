@@ -27,7 +27,6 @@ class SignUpPage extends Component {
     compareToFirstPassword = (rule, value, callback) => {
         const { form } = this.props;
         if (value && value !== form.getFieldValue('password')) {
-            callback('Two passwords that you enter is inconsistent!');
         } else {
             callback();
         }
@@ -50,11 +49,6 @@ class SignUpPage extends Component {
         e.preventDefault();
         let temp = e.target;
         let db = this.state.DataBase;
-        this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                console.log('Received values of form: ', values);
-            }
-        });
         let reg = 0;
         db.forEach(el => {
             if (temp[0].value === el.login) {
@@ -75,7 +69,6 @@ class SignUpPage extends Component {
             })
 
             window.localStorage.setItem('DataBase', JSON.stringify(db));
-            this.props.history.push('MainPage');
             this.props.history.push('MainPage');
         } else if (reg === 2) {
             message.error('You have entered the wrong password!');

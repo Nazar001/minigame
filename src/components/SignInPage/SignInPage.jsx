@@ -80,7 +80,7 @@ class SignInPage extends Component {
                             )}
                         </Form.Item>
                         <Form.Item className="gor-center">
-                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button> Or <a onClick={this.handleSignUp}>register now!</a>
+                            <Button type="primary" htmlType="submit" className="login-form-button">Log in</Button> Or <a href="" onClick={this.handleSignUp}>register now!</a>
                         </Form.Item>
                     </Form>
                 </div>
