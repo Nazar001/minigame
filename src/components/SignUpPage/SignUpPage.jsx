@@ -68,6 +68,7 @@ class SignUpPage extends Component {
                 password: temp[1].value
             })
 
+            window.localStorage.setItem('User', JSON.stringify(temp[0].value));
             window.localStorage.setItem('DataBase', JSON.stringify(db));
             this.props.history.push('MainPage');
         } else if (reg === 2) {

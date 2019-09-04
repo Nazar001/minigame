@@ -38,16 +38,17 @@ class SignInPage extends Component {
                 }
             };
         });
-        if(reg === 1) {
+        if (reg === 1) {
+            window.localStorage.setItem('User', JSON.stringify(temp[0].value));
             this.props.history.push('MainPage');
         } else if (reg === 2) {
             message.error('You have entered the wrong password!');
         } else {
             message.error('You have entered the wrong login!');
         }
-        
+
     };
-    
+
     handleSignUp = () => {
         this.props.history.push('signUp');
     };
