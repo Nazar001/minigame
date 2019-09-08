@@ -24,7 +24,6 @@ class PongPage extends Component {
         })
         if (this.state.isPlaying === true) {
             let fieldH = document.documentElement.clientHeight;
-            console.log(this.Rectangle)
             let scaleX = Math.random() * 3;
             let scaleY = Math.random() * 3;
             let temp = setInterval(() => {
@@ -41,7 +40,6 @@ class PongPage extends Component {
                     scaleX = Math.random() * -3;
                     scaleY = Math.random() * 3;
                     let temp = this.state.leftScore + 1;
-                    console.log(temp)
                     this.setState({
                         ballX: document.documentElement.clientWidth / 2 - 5,
                         ballY: document.documentElement.clientHeight / 2 - 5,
@@ -75,87 +73,126 @@ class PongPage extends Component {
         else
             return false;
     }
+
+    handleKeyUp = e => {
+        if (e.keyCode === 32) this.moveBall()
+        //Левый
+        // ВНИЗ!
+        if (e.keyCode === 83)
+            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height)
+                this.Rect.to({
+                    y: this.Rect.attrs.y + this.Rect.attrs.height,
+                    duration: 0.03
+                })
+        // ВВЕРХ!
+        if (e.keyCode === 87)
+            if (this.Rect.attrs.y > 0) {
+                this.Rect.to({
+                    y: this.Rect.attrs.y - this.Rect.attrs.height,
+                    duration: 0.03
+                })
+            }
+
+        // Правый
+        // ВНИЗ!
+        if (e.keyCode === 40)
+            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+                this.Rectangle.to({
+                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height,
+                    duration: 0.03
+                })
+        // ВВЕРХ!
+        if (e.keyCode === 38)
+            if (this.Rectangle.attrs.y > 0) {
+                this.Rectangle.to({
+                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height,
+                    duration: 0.03
+                })
+            }
+    };
+
     render() {
         return (
-            <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight}>
-                <Layer>
-                    <Rect
-                        x={0}
-                        y={0}
-                        width={document.documentElement.clientWidth}
-                        height={document.documentElement.clientHeight}
-                        fill='green'
-                    />
-                    <Rect
-                        x={document.documentElement.clientWidth / 2 - 10}
-                        y={0}
-                        width={10}
-                        height={document.documentElement.clientHeight}
-                        fill='white'
-                        opacity={0.8}
-                    />
-                </Layer>
-                <Layer key="ballLayer">
-                    <Circle
-                        ref={node => {
-                            this.Circle = node;
-                        }}
-                        x={this.state.ballX}
-                        y={this.state.ballY}
-                        radius={16}
-                        fill="white"
-                        onClick={() => this.moveBall(this.props.node)}
-                    />
-                    <Rect
-                        id='leftPlayer'
-                        ref={node => {
-                            this.Rect = node;
-                        }}
-                        x={20}
-                        y={document.documentElement.clientHeight / 2 - 45}
-                        width={15}
-                        height={90}
-                        fill='black'
-                    />
-
-                    <Rect
-                        id='rightPlayer'
-                        ref={node => {
-                            this.Rectangle = node;
-                        }}
-                        x={document.documentElement.clientWidth - 35}
-                        y={document.documentElement.clientHeight / 2 - 45}
-                        width={15}
-                        height={90}
-                        fill='black'
-                    />
-                </Layer>
-                <Layer>
-                    <Label>
-                        <Text
-                            x={document.documentElement.clientWidth / 2 - 120}
-                            fontSize={90}
-                            text={`${this.state.leftScore}`}
-                            wrap="char"
-                            align="center"
+            <div tabIndex='1' onKeyUp={this.handleKeyUp}>
+                <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
+                    <Layer>
+                        <Rect
+                            x={0}
+                            y={0}
+                            width={document.documentElement.clientWidth}
+                            height={document.documentElement.clientHeight}
+                            fill='green'
                         />
-                        <Text
-                            x={document.documentElement.clientWidth / 2 - 43}
-                            fontSize={90}
-                            text=' : '
-                            wrap="char"
-                            align="center"
+                        <Rect
+                            x={document.documentElement.clientWidth / 2 - 10}
+                            y={0}
+                            width={10}
+                            height={document.documentElement.clientHeight}
+                            fill='white'
+                            opacity={0.8}
                         />
-                        <Text
-                            x={document.documentElement.clientWidth / 2 + 30}
-                            fontSize={90}
-                            text={`${this.state.rightScore}`}
-                            wrap="char"
-                            align="center"
+                    </Layer>
+                    <Layer key="ballLayer">
+                        <Circle
+                            ref={node => {
+                                this.Circle = node;
+                            }}
+                            x={this.state.ballX}
+                            y={this.state.ballY}
+                            radius={16}
+                            fill="white"
                         />
-                    </Label>
-                </Layer>
-            </Stage>
+                        <Rect
+                            id='leftPlayer'
+                            ref={node => {
+                                this.Rect = node;
+                            }}
+                            x={20}
+                            y={document.documentElement.clientHeight / 2 - 45}
+                            width={15}
+                            height={90}
+                            fill='black'
+                            onKeyUp={this.handleKeyUp}
+                        />
+                        <Rect
+                            id='rightPlayer'
+                            ref={node => {
+                                this.Rectangle = node;
+                            }}
+                            x={document.documentElement.clientWidth - 35}
+                            y={document.documentElement.clientHeight / 2 - 45}
+                            width={15}
+                            height={90}
+                            fill='black'
+                        />
+                    </Layer>
+                    <Layer>
+                        <Label>
+                            <Text
+                                x={document.documentElement.clientWidth / 2 - 120}
+                                fontSize={90}
+                                text={`${this.state.leftScore}`}
+                                wrap="char"
+                                align="center"
+                            />
+                            <Text
+                                x={document.documentElement.clientWidth / 2 - 43}
+                                fontSize={90}
+                                text=' : '
+                                wrap="char"
+                                align="center"
+                            />
+                            <Text
+                                x={document.documentElement.clientWidth / 2 + 30}
+                                fontSize={90}
+                                text={`${this.state.rightScore}`}
+                                wrap="char"
+                                align="center"
+                            />
+                        </Label>
+                    </Layer>
+                </Stage >
+            </div>
         );
     }
 }
