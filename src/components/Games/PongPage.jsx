@@ -14,7 +14,8 @@ class PongPage extends Component {
             ballY: document.documentElement.clientHeight / 2 - 5,
             isPlaying: false,
             leftScore: 0,
-            rightScore: 0
+            rightScore: 0,
+            botActive: false
         }
     }
 
@@ -22,11 +23,13 @@ class PongPage extends Component {
         this.setState({
             isPlaying: true
         })
-        if (this.state.isPlaying === true) {
+        {
             let fieldH = document.documentElement.clientHeight;
             let scaleX = Math.random() * 3;
             let scaleY = Math.random() * 3;
             let temp = setInterval(() => {
+                if (this.state.botActive) this.ai();
+
                 this.setState({
                     ballX: this.state.ballX += scaleX,
                     ballY: this.state.ballY += scaleY
@@ -62,6 +65,26 @@ class PongPage extends Component {
                 }
             })
         }
+
+    }
+
+    ai = () => {
+        if (this.Circle.attrs.y < this.Rectangle.attrs.y + this.Rectangle.attrs.height) {
+            if (this.Rectangle.attrs.y > 0)
+                this.Rectangle.to({
+                    x: this.Rectangle.attrs.x,
+                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 2,
+                    duration: 0.03
+                })
+        }
+        else {
+            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+                this.Rectangle.to({
+                    x: this.Rectangle.attrs.x,
+                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 2,
+                    duration: 0.03
+                })
+        }
     }
 
     touch = (a, b) => {
@@ -74,22 +97,28 @@ class PongPage extends Component {
             return false;
     }
 
-    handleKeyUp = e => {
-        if (e.keyCode === 32) this.moveBall()
+    handleKeyDown = e => {
+        if (e.keyCode === 107) this.setState({
+            botActive: !this.state.botActive
+        })
+
+        if (e.keyCode === 32)
+            if (this.state.isPlaying === false)
+                this.moveBall()
         //Левый
         // ВНИЗ!
         if (e.keyCode === 83)
             if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height)
                 this.Rect.to({
-                    y: this.Rect.attrs.y + this.Rect.attrs.height,
-                    duration: 0.03
+                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
+                    duration: 0.06
                 })
         // ВВЕРХ!
         if (e.keyCode === 87)
             if (this.Rect.attrs.y > 0) {
                 this.Rect.to({
-                    y: this.Rect.attrs.y - this.Rect.attrs.height,
-                    duration: 0.03
+                    y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
+                    duration: 0.06
                 })
             }
 
@@ -98,22 +127,22 @@ class PongPage extends Component {
         if (e.keyCode === 40)
             if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
                 this.Rectangle.to({
-                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height,
-                    duration: 0.03
+                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
+                    duration: 0.06
                 })
         // ВВЕРХ!
         if (e.keyCode === 38)
             if (this.Rectangle.attrs.y > 0) {
                 this.Rectangle.to({
-                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height,
-                    duration: 0.03
+                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
+                    duration: 0.06
                 })
             }
     };
 
     render() {
         return (
-            <div tabIndex='1' onKeyUp={this.handleKeyUp}>
+            <div tabIndex='1' onKeyDown={this.handleKeyDown}>
                 <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
                     <Layer>
                         <Rect
@@ -152,7 +181,7 @@ class PongPage extends Component {
                             width={15}
                             height={90}
                             fill='black'
-                            onKeyUp={this.handleKeyUp}
+                            onKeyDown={this.handleKeyDown}
                         />
                         <Rect
                             id='rightPlayer'
