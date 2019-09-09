@@ -14,7 +14,8 @@ class PongPage extends Component {
             ballY: document.documentElement.clientHeight / 2 - 5,
             isPlaying: false,
             leftScore: 0,
-            rightScore: 0
+            rightScore: 0,
+            botActive: true
         }
     }
 
@@ -27,6 +28,7 @@ class PongPage extends Component {
             let scaleX = Math.random() * 3;
             let scaleY = Math.random() * 3;
             let temp = setInterval(() => {
+                if (this.state.botActive) this.ai();
                 this.setState({
                     ballX: this.state.ballX += scaleX,
                     ballY: this.state.ballY += scaleY
@@ -62,7 +64,26 @@ class PongPage extends Component {
                 }
             })
         }
-        
+
+    }
+
+    ai = () => {
+        if (this.Circle.attrs.y < this.Rectangle.attrs.y + this.Rectangle.attrs.height) {
+            if (this.Rectangle.attrs.y > 0)
+                this.Rectangle.to({
+                    x: this.Rectangle.attrs.x,
+                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 2,
+                    duration: 0.03
+                })
+        }
+        else {
+            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+                this.Rectangle.to({
+                    x: this.Rectangle.attrs.x,
+                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 2,
+                    duration: 0.03
+                })
+        }
     }
 
     touch = (a, b) => {
@@ -76,20 +97,24 @@ class PongPage extends Component {
     }
 
     handleKeyDown = e => {
+        if (e.keyCode === 9) this.setState({
+            botActive: !this.state.botActive
+        })
+
         if (e.keyCode === 32) this.moveBall()
         //Левый
         // ВНИЗ!
         if (e.keyCode === 83)
             if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height)
                 this.Rect.to({
-                    y: this.Rect.attrs.y + this.Rect.attrs.height/3,
+                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
                     duration: 0.06
                 })
         // ВВЕРХ!
         if (e.keyCode === 87)
             if (this.Rect.attrs.y > 0) {
                 this.Rect.to({
-                    y: this.Rect.attrs.y - this.Rect.attrs.height/3,
+                    y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
                     duration: 0.06
                 })
             }
@@ -99,14 +124,14 @@ class PongPage extends Component {
         if (e.keyCode === 40)
             if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
                 this.Rectangle.to({
-                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height/3,
+                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
                     duration: 0.06
                 })
         // ВВЕРХ!
         if (e.keyCode === 38)
             if (this.Rectangle.attrs.y > 0) {
                 this.Rectangle.to({
-                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height/3,
+                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
                     duration: 0.06
                 })
             }
