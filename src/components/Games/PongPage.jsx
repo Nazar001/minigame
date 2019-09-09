@@ -15,7 +15,7 @@ class PongPage extends Component {
             isPlaying: false,
             leftScore: 0,
             rightScore: 0,
-            botActive: true
+            botActive: false
         }
     }
 
@@ -23,12 +23,13 @@ class PongPage extends Component {
         this.setState({
             isPlaying: true
         })
-        if (this.state.isPlaying === true) {
+        {
             let fieldH = document.documentElement.clientHeight;
             let scaleX = Math.random() * 3;
             let scaleY = Math.random() * 3;
             let temp = setInterval(() => {
                 if (this.state.botActive) this.ai();
+
                 this.setState({
                     ballX: this.state.ballX += scaleX,
                     ballY: this.state.ballY += scaleY
@@ -97,11 +98,13 @@ class PongPage extends Component {
     }
 
     handleKeyDown = e => {
-        if (e.keyCode === 9) this.setState({
+        if (e.keyCode === 107) this.setState({
             botActive: !this.state.botActive
         })
 
-        if (e.keyCode === 32) this.moveBall()
+        if (e.keyCode === 32)
+            if (this.state.isPlaying === false)
+                this.moveBall()
         //Левый
         // ВНИЗ!
         if (e.keyCode === 83)
