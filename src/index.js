@@ -11,11 +11,11 @@ class App extends React.Component {
     render() {
         return (
             <Router>
-                <Route path="/" exact component={PongPage} />
-                <Route path="/signIn" component={SignInPage} />
+                <Route path="/" exact component={SignInPage} />
+                <Route path="/signIn" exact component={SignInPage} />
                 <Route path="/signUp" component={SignUpPage} />
                 <Route path="/mainPage" component={MainPage} />
-                <Route path="/pong" exact component={PongPage} />
+                <Route path="/pong" component={PongPage} />
 
             </Router>
         );
