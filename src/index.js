@@ -12,7 +12,7 @@ class App extends React.Component {
         return (
             <Router>
                 <Route path="/" exact component={PongPage} />
-                <Route path="/signIn" exact component={SignInPage} />
+                <Route path="/signIn" component={SignInPage} />
                 <Route path="/signUp" component={SignUpPage} />
                 <Route path="/mainPage" component={MainPage} />
                 <Route path="/pong" exact component={PongPage} />
