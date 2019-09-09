@@ -3,7 +3,22 @@ import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Group, Arrow, Tag, Text, Label } from 'react-konva';
 
+let leftData = (JSON.parse(window.localStorage.getItem('leftData'))) ? JSON.parse(window.localStorage.getItem('leftData')) : {
+    leftName: 'Biba',
+    leftScore: 0,
+    leftY: document.documentElement.clientHeight / 2 - 45,
+};
+let rightData = (JSON.parse(window.localStorage.getItem('rightData'))) ? JSON.parse(window.localStorage.getItem('rightData')) : {
+    rightName: 'Boba',
+    rightScore: 0,
+    rightY: document.documentElement.clientHeight / 2 - 45,
+};
 
+
+let leftObj = {};
+let rightObj = {};
+
+// TODO1 localstorage: x,y plates  
 
 class PongPage extends Component {
     constructor(props) {
@@ -13,58 +28,107 @@ class PongPage extends Component {
             ballX: document.documentElement.clientWidth / 2 - 5,
             ballY: document.documentElement.clientHeight / 2 - 5,
             isPlaying: false,
-            leftScore: 0,
-            rightScore: 0,
-            botActive: false
+            botActive: false,
+
+            //left
+            leftName: leftData.leftName,
+            leftScore: leftData.leftScore,
+            leftY: leftData.leftY,
+            //right
+            rightName: rightData.rightName,
+            rightScore: rightData.rightScore,
+            rightY: rightData.rightY,
         }
     }
+    updateRight = () => {
+        let rightData = JSON.parse(window.localStorage.getItem('rightData'))
+        this.setState({
+            //right
+            rightName: rightData.rightName,
+            rightScore: rightData.rightScore,
+            rightY: rightData.rightY,
+        })
+        window.localStorage.setItem('rightData', JSON.stringify(rightData));
+    }
 
+    updateLeft = () => {
+        let leftData = JSON.parse(window.localStorage.getItem('leftData'))
+        this.setState({
+            //left
+            leftName: leftData.leftName,
+            leftScore: leftData.leftScore,
+            leftY: leftData.leftY,
+        })
+        window.localStorage.setItem('leftData', JSON.stringify(leftData));
+
+    }
     moveBall = () => {
         this.setState({
             isPlaying: true
         })
-        {
-            let fieldH = document.documentElement.clientHeight;
-            let scaleX = Math.random() * 3;
-            let scaleY = Math.random() * 3;
-            let temp = setInterval(() => {
-                if (this.state.botActive) this.ai();
 
-                this.setState({
-                    ballX: this.state.ballX += scaleX,
-                    ballY: this.state.ballY += scaleY
-                })
-                // Мячик по-вертикали
-                if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
-                    scaleY = -scaleY;
-                }
-                // Мячик направо
-                if (this.state.ballX > document.documentElement.clientWidth - 16) {
-                    scaleX = Math.random() * -3;
-                    scaleY = Math.random() * 3;
-                    let temp = this.state.leftScore + 1;
-                    this.setState({
-                        ballX: document.documentElement.clientWidth / 2 - 5,
-                        ballY: document.documentElement.clientHeight / 2 - 5,
-                        leftScore: temp
-                    })
-                }
-                // Мячик налево
-                if (this.state.ballX < 16) {
-                    scaleX = Math.random() * 3;
-                    scaleY = Math.random() * 3;
-                    let temp = this.state.rightScore + 1;
-                    this.setState({
-                        ballX: document.documentElement.clientWidth / 2 - 5,
-                        ballY: document.documentElement.clientHeight / 2 - 5,
-                        rightScore: temp
-                    })
-                }
-                if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
-                    scaleX = -scaleX * 1.1;
-                }
+        let fieldH = document.documentElement.clientHeight;
+        let scaleX = Math.random() * 3;
+        let scaleY = Math.random() * 3;
+        let temp = setInterval(() => {
+            if (this.state.botActive) this.ai();
+            this.setState({
+                ballX: this.state.ballX += scaleX,
+                ballY: this.state.ballY += scaleY
             })
-        }
+            // Мячик по-вертикали
+            if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
+                scaleY = -scaleY;
+            }
+            // Мячик направо
+            if (this.state.ballX > document.documentElement.clientWidth - 16) {
+                scaleX = Math.random() * -3;
+                scaleY = Math.random() * 3;
+                let temp = this.state.leftScore + 1;
+                this.setState({
+                    ballX: document.documentElement.clientWidth / 2 - 5,
+                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    leftScore: temp
+                })
+                leftObj = {
+                    leftName: leftData.leftName,
+                    leftY: this.state.leftY,
+                    leftScore: this.state.leftScore
+                }
+                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
+                this.updateLeft()
+            }
+
+            // Мячик налево
+            if (this.state.ballX < 16) {
+                scaleX = Math.random() * 3;
+                scaleY = Math.random() * 3;
+                let temp = this.state.rightScore + 1;
+                this.setState({
+                    ballX: document.documentElement.clientWidth / 2 - 5,
+                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    rightScore: temp
+                })
+                rightObj = {
+                    rightName: rightData.rightName,
+                    rightY: this.state.rightY,
+                    rightScore: this.state.rightScore
+                }
+                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
+                this.updateRight()
+            }
+            if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
+                scaleX = -scaleX * 1.1;
+            }
+            if (this.state.leftScore === 21) {
+                alert(this.state.leftName + ' wins')
+                clearInterval(temp);
+            }
+            else if (this.state.rightScore === 21) {
+                alert(this.state.rightName + ' wins')
+                clearInterval(temp);
+            }
+        })
 
     }
 
@@ -96,6 +160,15 @@ class PongPage extends Component {
         else
             return false;
     }
+    touch = (a, b) => {
+        if (a.attrs.x + a.attrs.radius > b.attrs.x &&
+            a.attrs.x < b.attrs.x + b.attrs.width &&
+            a.attrs.y + a.attrs.radius > b.attrs.y &&
+            a.attrs.y < b.attrs.y + b.attrs.height)
+            return true;
+        else
+            return false;
+    }
 
     handleKeyDown = e => {
         if (e.keyCode === 107) this.setState({
@@ -108,11 +181,22 @@ class PongPage extends Component {
         //Левый
         // ВНИЗ!
         if (e.keyCode === 83)
-            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height)
+            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
                 this.Rect.to({
                     y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
                     duration: 0.06
                 })
+                this.setState({
+                    leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
+                })
+                leftObj = {
+                    leftName: leftData.leftName,
+                    leftY: this.state.leftY,
+                    leftScore: this.state.leftScore
+                }
+                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
+                this.updateLeft()
+            }
         // ВВЕРХ!
         if (e.keyCode === 87)
             if (this.Rect.attrs.y > 0) {
@@ -120,16 +204,38 @@ class PongPage extends Component {
                     y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
                     duration: 0.06
                 })
+                this.setState({
+                    leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
+                })
+                leftObj = {
+                    leftName: leftData.leftName,
+                    leftY: this.state.leftY,
+                    leftScore: this.state.leftScore
+                }
+                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
+                this.updateLeft()
+
             }
 
         // Правый
         // ВНИЗ!
         if (e.keyCode === 40)
-            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height) {
                 this.Rectangle.to({
                     y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
                     duration: 0.06
                 })
+                this.setState({
+                    rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
+                })
+                rightObj = {
+                    rightName: rightData.rightName,
+                    rightY: this.state.rightY,
+                    rightScore: this.state.rightScore
+                }
+                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
+                this.updateRight()
+            }
         // ВВЕРХ!
         if (e.keyCode === 38)
             if (this.Rectangle.attrs.y > 0) {
@@ -137,6 +243,16 @@ class PongPage extends Component {
                     y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
                     duration: 0.06
                 })
+                this.setState({
+                    rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
+                })
+                rightObj = {
+                    rightName: rightData.rightName,
+                    rightY: this.state.rightY,
+                    rightScore: this.state.rightScore
+                }
+                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
+                this.updateRight()
             }
     };
 
@@ -177,7 +293,7 @@ class PongPage extends Component {
                                 this.Rect = node;
                             }}
                             x={20}
-                            y={document.documentElement.clientHeight / 2 - 45}
+                            y={this.state.leftY}
                             width={15}
                             height={90}
                             fill='black'
@@ -189,7 +305,7 @@ class PongPage extends Component {
                                 this.Rectangle = node;
                             }}
                             x={document.documentElement.clientWidth - 35}
-                            y={document.documentElement.clientHeight / 2 - 45}
+                            y={this.state.rightY}
                             width={15}
                             height={90}
                             fill='black'
