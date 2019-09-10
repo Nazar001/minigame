@@ -1,18 +1,21 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router";
 import './PongPage.scss';
-import { Stage, Layer, Rect, Circle, Group, Arrow, Tag, Text, Label } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 
-let leftData = (JSON.parse(window.localStorage.getItem('leftData'))) ? JSON.parse(window.localStorage.getItem('leftData')) : {
+let leftData = {
     leftName: 'Biba',
     leftScore: 0,
     leftY: document.documentElement.clientHeight / 2 - 45,
 };
-let rightData = (JSON.parse(window.localStorage.getItem('rightData'))) ? JSON.parse(window.localStorage.getItem('rightData')) : {
+window.localStorage.setItem('leftData', JSON.stringify(leftData));
+
+let rightData = {
     rightName: 'Boba',
     rightScore: 0,
     rightY: document.documentElement.clientHeight / 2 - 45,
 };
+window.localStorage.setItem('rightData', JSON.stringify(rightData));
 
 
 let leftObj = {};
