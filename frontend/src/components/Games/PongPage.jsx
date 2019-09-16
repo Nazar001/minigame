@@ -3,19 +3,15 @@ import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 
+const URL = 'ws://localhost:3030'
+
 let leftData = {
-    leftName: 'Biba',
-    leftScore: 0,
     leftY: document.documentElement.clientHeight / 2 - 45,
 };
-window.localStorage.setItem('leftData', JSON.stringify(leftData));
 
 let rightData = {
-    rightName: 'Boba',
-    rightScore: 0,
     rightY: document.documentElement.clientHeight / 2 - 45,
 };
-window.localStorage.setItem('rightData', JSON.stringify(rightData));
 
 
 let leftObj = {};
@@ -24,47 +20,59 @@ let rightObj = {};
 // TODO1 localstorage: x,y plates  
 
 class PongPage extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            ballDirection: false,
-            ballX: document.documentElement.clientWidth / 2 - 5,
-            ballY: document.documentElement.clientHeight / 2 - 5,
-            isPlaying: false,
-            botActive: false,
+    state = {
+        ballDirection: false,
+        ballX: document.documentElement.clientWidth / 2 - 5,
+        ballY: document.documentElement.clientHeight / 2 - 5,
+        isPlaying: true,
+        botActive: false,
 
-            //left
-            leftName: leftData.leftName,
-            leftScore: leftData.leftScore,
-            leftY: leftData.leftY,
-            //right
-            rightName: rightData.rightName,
-            rightScore: rightData.rightScore,
-            rightY: rightData.rightY,
+        //left
+        leftY: leftData.leftY,
+        //right
+        rightY: rightData.rightY
+    }
+
+    ws = new WebSocket(URL)
+
+    componentDidMount() {
+        this.ws.onopen = () => {
+            // on connecting, do nothing but log it to the console
+            console.log('connected')
         }
-    }
+        debugger
+        this.ws.onmessage = evt => {
+            debugger
+            // on receiving a message, add it to the list of messages
+            const message = JSON.parse(evt.data)
+            console.log('update');
+
+            this.updateLeft(message);
+        }
+
+        this.ws.onclose = () => {
+            console.log('disconnected')
+            // automatically try to reconnect on connection loss
+            this.setState({
+                ws: new WebSocket(URL),
+            })
+        }
+    };
+
     updateRight = () => {
-        let rightData = JSON.parse(window.localStorage.getItem('rightData'))
         this.setState({
             //right
-            rightName: rightData.rightName,
-            rightScore: rightData.rightScore,
-            rightY: rightData.rightY,
+            rightY: rightData.rightY
         })
-        window.localStorage.setItem('rightData', JSON.stringify(rightData));
     }
 
-    updateLeft = () => {
-        let leftData = JSON.parse(window.localStorage.getItem('leftData'))
+    updateLeft = (message) => {
+        this.ws.send(JSON.stringify(message))
         this.setState({
-            //left
-            leftName: leftData.leftName,
-            leftScore: leftData.leftScore,
-            leftY: leftData.leftY,
+            leftY: message
         })
-        window.localStorage.setItem('leftData', JSON.stringify(leftData));
-
     }
+    
     moveBall = () => {
         this.setState({
             isPlaying: true
@@ -94,12 +102,10 @@ class PongPage extends Component {
                     leftScore: temp
                 })
                 leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
+                    leftY: this.state.leftY
                 }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
+                debugger
+                this.updateLeft(leftObj.leftY)
             }
 
             // Мячик налево
@@ -113,11 +119,8 @@ class PongPage extends Component {
                     rightScore: temp
                 })
                 rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
+                    rightY: this.state.rightY
                 }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
                 this.updateRight()
             }
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
@@ -180,26 +183,21 @@ class PongPage extends Component {
 
         if (e.keyCode === 32)
             if (this.state.isPlaying === false)
-                this.moveBall()
-        //Левый
-        // ВНИЗ!
-        if (e.keyCode === 83)
-            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
-                this.Rect.to({
-                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
-                })
-                leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
-                }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
-            }
+                // this.moveBall()
+                //Левый
+                // ВНИЗ!
+                if (e.keyCode === 83)
+                    debugger
+        if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
+            this.Rect.to({
+                y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
+                duration: 0.06
+            })
+            this.setState({
+                leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
+            })
+            this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
+        }
         // ВВЕРХ!
         if (e.keyCode === 87)
             if (this.Rect.attrs.y > 0) {
@@ -210,13 +208,7 @@ class PongPage extends Component {
                 this.setState({
                     leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
                 })
-                leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
-                }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
+                this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
 
             }
 
@@ -232,11 +224,8 @@ class PongPage extends Component {
                     rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
                 })
                 rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
+                    rightY: this.state.rightY
                 }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
                 this.updateRight()
             }
         // ВВЕРХ!
@@ -250,11 +239,8 @@ class PongPage extends Component {
                     rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
                 })
                 rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
+                    rightY: this.state.rightY
                 }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
                 this.updateRight()
             }
     };
