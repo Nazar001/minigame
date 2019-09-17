@@ -21,16 +21,14 @@ let rightObj = {};
 
 class PongPage extends Component {
     state = {
-        ballDirection: false,
-
+        leftScore: 0,
+        rightScore: 0,
         isPlaying: false,
         botActive: false,
-        play: {
-            leftY: leftData.leftY,
-            rightY: rightData.rightY,
-            ballX: document.documentElement.clientWidth / 2 - 5,
-            ballY: document.documentElement.clientHeight / 2 - 5,
-        }
+        leftY: leftData.leftY,
+        rightY: rightData.rightY,
+        ballX: document.documentElement.clientWidth / 2 - 5,
+        ballY: document.documentElement.clientHeight / 2 - 5,
     }
 
     ws = new WebSocket(URL)
@@ -40,9 +38,9 @@ class PongPage extends Component {
             // on connecting, do nothing but log it to the console
             console.log('connected')
         }
-        debugger
+
         this.ws.onmessage = evt => {
-            debugger
+
             // on receiving a message, add it to the list of messages
             const message = JSON.parse(evt.data)
             console.log('update');
@@ -59,54 +57,64 @@ class PongPage extends Component {
     };
 
     updateRight = (message) => {
-        debugger
+
         let obj = {
+            leftScore: this.state.leftScore,
+            rightScore: this.state.rightScore,
             rightY: message,
-            leftY: this.state.play.leftY,
-            ballX: this.state.play.ballX,
-            ballY: this.state.play.ballY
+            isPlaying: this.state.isPlaying,
+            leftY: this.state.leftY,
+            ballX: this.state.ballX,
+            ballY: this.state.ballY,
+
         };
         this.ws.send(JSON.stringify(obj));
         this.setState({
-            play: {
-                rightY: message,
-                leftY: this.state.play.leftY,
-                ballX: this.state.play.ballX,
-                ballY: this.state.play.ballY
-            }
+            rightY: message,
         });
     }
 
     updateLeft = (message) => {
-        debugger
         let obj = {
             leftY: message,
-            rightY: this.state.play.rightY,
-            ballX: this.state.play.ballX,
-            ballY: this.state.play.ballY
+            leftScore: this.state.leftScore,
+            rightScore: this.state.rightScore,
+            isPlaying: this.state.isPlaying,
+            rightY: this.state.rightY,
+            ballX: this.state.ballX,
+            ballY: this.state.ballY
         };
         this.ws.send(JSON.stringify(obj));
         this.setState({
-            play: {
-                leftY: message,
-                rightY: this.state.play.rightY,
-                ballX: this.state.play.ballX,
-                ballY: this.state.play.ballY
-            }
+            leftY: message,
         });
     }
 
     up = (message) => {
-        debugger
         this.setState({
-            play: {
-                leftY: message.leftY,
-                rightY: message.rightY,
-                ballX: message.ballX,
-                ballY: message.ballY
-            }
+            leftScore: message.leftScore,
+            rightScore: message.rightScore,
+            leftY: message.leftY,
+            rightY: message.rightY,
+            isPlaying: message.isPlaying,
+            ballX: message.ballX,
+            ballY: message.ballY
         })
     };
+
+    ball = (message) => {
+
+        let obj = {
+            leftY: this.state.leftY,
+            leftScore: this.state.leftScore,
+            rightScore: this.state.rightScore,
+            isPlaying: this.state.isPlaying,
+            rightY: this.state.rightY,
+            ballX: message.ballX,
+            ballY: message.ballY
+        };
+        this.ws.send(JSON.stringify(obj));
+    }
 
     moveBall = () => {
         this.setState({
@@ -119,12 +127,8 @@ class PongPage extends Component {
         let temp = setInterval(() => {
             if (this.state.botActive) this.ai();
             this.setState({
-                play: {
-                    leftY: this.state.play.leftY,
-                    rightY: this.state.play.rightY,
-                    ballX: this.state.ballX += scaleX,
-                    ballY: this.state.ballY += scaleY
-                }
+                ballX: this.state.ballX += scaleX,
+                ballY: this.state.ballY += scaleY
             })
             // Мячик по-вертикали
             if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
@@ -136,19 +140,10 @@ class PongPage extends Component {
                 scaleY = Math.random() * 3;
                 let temp = this.state.leftScore + 1;
                 this.setState({
-                    play: {
-                        leftY: this.state.play.leftY,
-                        rightY: this.state.play.rightY,
-                        ballX: document.documentElement.clientWidth / 2 - 5,
-                        ballY: document.documentElement.clientHeight / 2 - 5
-                    },
+                    ballX: document.documentElement.clientWidth / 2 - 5,
+                    ballY: document.documentElement.clientHeight / 2 - 5,
                     leftScore: temp
                 })
-                leftObj = {
-                    leftY: this.state.leftY
-                }
-                debugger
-                this.updateLeft(leftObj.leftY)
             }
 
             // Мячик налево
@@ -157,18 +152,10 @@ class PongPage extends Component {
                 scaleY = Math.random() * 3;
                 let temp = this.state.rightScore + 1;
                 this.setState({
-                    play: {
-                        leftY: this.state.play.leftY,
-                        rightY: this.state.play.rightY,
-                        ballX: document.documentElement.clientWidth / 2 - 5,
-                        ballY: document.documentElement.clientHeight / 2 - 5
-                    },
+                    ballX: document.documentElement.clientWidth / 2 - 5,
+                    ballY: document.documentElement.clientHeight / 2 - 5,
                     rightScore: temp
                 })
-                rightObj = {
-                    rightY: this.state.rightY
-                }
-                this.updateRight()
             }
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
                 scaleX = -scaleX * 1.1;
@@ -181,6 +168,11 @@ class PongPage extends Component {
                 alert(this.state.rightName + ' wins')
                 clearInterval(temp);
             }
+            let ob = {
+                ballX: this.state.ballX += scaleX,
+                ballY: this.state.ballY += scaleY
+            };
+            this.ball(ob);
         })
 
     }
@@ -240,9 +232,7 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    play: {
-                        leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
-                    }
+                    leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
                 })
                 this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
             }
@@ -254,9 +244,7 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    play: {
-                        leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
-                    }
+                    leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
                 });
                 this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
 
@@ -271,9 +259,7 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    play: {
-                        rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
-                    }
+                    rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
                 })
                 this.updateRight(this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3)
             }
@@ -285,9 +271,7 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    play: {
-                        rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
-                    }
+                    rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
                 })
                 this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
             }
@@ -319,8 +303,8 @@ class PongPage extends Component {
                             ref={node => {
                                 this.Circle = node;
                             }}
-                            x={this.state.play.ballX}
-                            y={this.state.play.ballY}
+                            x={this.state.ballX}
+                            y={this.state.ballY}
                             radius={16}
                             fill="white"
                         />
@@ -330,7 +314,7 @@ class PongPage extends Component {
                                 this.Rect = node;
                             }}
                             x={20}
-                            y={this.state.play.leftY}
+                            y={this.state.leftY}
                             width={15}
                             height={90}
                             fill='black'
@@ -342,7 +326,7 @@ class PongPage extends Component {
                                 this.Rectangle = node;
                             }}
                             x={document.documentElement.clientWidth - 35}
-                            y={this.state.play.rightY}
+                            y={this.state.rightY}
                             width={15}
                             height={90}
                             fill='black'
