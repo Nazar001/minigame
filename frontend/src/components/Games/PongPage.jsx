@@ -9,11 +9,11 @@ address = address.replace(":3000/", ":3030");
 const URL = address;
 
 let leftData = {
-    leftY: document.documentElement.clientHeight / 2 - 45,
+    leftY: 720 / 2 - 45,
 };
 
 let rightData = {
-    rightY: document.documentElement.clientHeight / 2 - 45,
+    rightY: 720 / 2 - 45,
 };
 
 class PongPage extends Component {
@@ -24,8 +24,8 @@ class PongPage extends Component {
         botActive: false,
         leftY: leftData.leftY,
         rightY: rightData.rightY,
-        ballX: document.documentElement.clientWidth / 2 - 5,
-        ballY: document.documentElement.clientHeight / 2 - 5,
+        ballX: 720 / 2 - 5,
+        ballY: 1280 / 2 - 5,
     }
 
     ws = new WebSocket(URL)
@@ -66,8 +66,6 @@ class PongPage extends Component {
             setTimeout(function () {
                 this.ws.send(JSON.stringify(obj));
             }, 100);
-        } else {
-            this.ws.send(JSON.stringify(obj));
         }
 
         this.setState({
@@ -90,8 +88,6 @@ class PongPage extends Component {
             setTimeout(function () {
                 this.ws.send(JSON.stringify(obj));
             }, 100);
-        } else {
-            this.ws.send(JSON.stringify(obj));
         }
 
         this.setState({
@@ -112,7 +108,6 @@ class PongPage extends Component {
     };
 
     ball = (message) => {
-
         let obj = {
             leftY: this.state.leftY,
             leftScore: this.state.leftScore,
@@ -126,8 +121,6 @@ class PongPage extends Component {
             setTimeout(function () {
                 this.ws.send(JSON.stringify(obj));
             }, 100);
-        } else {
-            this.ws.send(JSON.stringify(obj));
         }
     }
 
@@ -136,7 +129,7 @@ class PongPage extends Component {
             isPlaying: true
         })
 
-        let fieldH = document.documentElement.clientHeight;
+        let fieldH = 720;
         let scaleX = Math.random() * 3;
         let scaleY = Math.random() * 3;
         let temp = setInterval(() => {
@@ -150,13 +143,13 @@ class PongPage extends Component {
                 scaleY = -scaleY;
             }
             // Мячик направо
-            if (this.state.ballX > document.documentElement.clientWidth - 16) {
+            if (this.state.ballX > 1280 - 10) {
                 scaleX = Math.random() * -3;
                 scaleY = Math.random() * 3;
                 let temp = this.state.leftScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    ballX: 1280 / 2 - 5,
+                    ballY: 720 / 2 - 5,
                     leftScore: temp
                 })
             }
@@ -167,8 +160,8 @@ class PongPage extends Component {
                 scaleY = Math.random() * 3;
                 let temp = this.state.rightScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    ballX: 1280 / 2 - 5,
+                    ballY: 720 / 2 - 5,
                     rightScore: temp
                 })
             }
@@ -201,7 +194,7 @@ class PongPage extends Component {
                 })
         }
         else {
-            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+            if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height)
                 this.Rectangle.to({
                     x: this.Rectangle.attrs.x,
                     y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 2,
@@ -210,15 +203,6 @@ class PongPage extends Component {
         }
     }
 
-    touch = (a, b) => {
-        if (a.attrs.x + a.attrs.radius > b.attrs.x &&
-            a.attrs.x < b.attrs.x + b.attrs.width &&
-            a.attrs.y + a.attrs.radius > b.attrs.y &&
-            a.attrs.y < b.attrs.y + b.attrs.height)
-            return true;
-        else
-            return false;
-    }
     touch = (a, b) => {
         if (a.attrs.x + a.attrs.radius > b.attrs.x &&
             a.attrs.x < b.attrs.x + b.attrs.width &&
@@ -240,7 +224,7 @@ class PongPage extends Component {
         //Левый
         // ВНИЗ!
         if (e.keyCode === 83)
-            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
+            if (this.Rect.attrs.y < 720 - this.Rect.attrs.height) {
                 this.Rect.to({
                     y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
                     duration: 0.06
@@ -267,7 +251,7 @@ class PongPage extends Component {
         // Правый
         // ВНИЗ!
         if (e.keyCode === 40)
-            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height) {
+            if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height) {
                 this.Rectangle.to({
                     y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
                     duration: 0.06
@@ -294,20 +278,20 @@ class PongPage extends Component {
     render() {
         return (
             <div tabIndex='1' onKeyDown={this.handleKeyDown}>
-                <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
+                <Stage width={1280} height={720} >
                     <Layer>
                         <Rect
                             x={0}
                             y={0}
-                            width={document.documentElement.clientWidth}
-                            height={document.documentElement.clientHeight}
+                            width={1280}
+                            height={720}
                             fill='green'
                         />
                         <Rect
-                            x={document.documentElement.clientWidth / 2 - 10}
+                            x={1280 / 2 - 10}
                             y={0}
                             width={10}
-                            height={document.documentElement.clientHeight}
+                            height={720}
                             fill='white'
                             opacity={0.8}
                         />
@@ -319,7 +303,7 @@ class PongPage extends Component {
                             }}
                             x={this.state.ballX}
                             y={this.state.ballY}
-                            radius={16}
+                            radius={10}
                             fill="white"
                         />
                         <Rect
@@ -339,7 +323,7 @@ class PongPage extends Component {
                             ref={node => {
                                 this.Rectangle = node;
                             }}
-                            x={document.documentElement.clientWidth - 35}
+                            x={1280 - 35}
                             y={this.state.rightY}
                             width={15}
                             height={90}
@@ -349,21 +333,21 @@ class PongPage extends Component {
                     <Layer>
                         <Label>
                             <Text
-                                x={document.documentElement.clientWidth / 2 - 120}
+                                x={1280 / 2 - 120}
                                 fontSize={90}
                                 text={`${this.state.leftScore}`}
                                 wrap="char"
                                 align="center"
                             />
                             <Text
-                                x={document.documentElement.clientWidth / 2 - 43}
+                                x={1280 / 2 - 43}
                                 fontSize={90}
                                 text=' : '
                                 wrap="char"
                                 align="center"
                             />
                             <Text
-                                x={document.documentElement.clientWidth / 2 + 30}
+                                x={1280 / 2 + 30}
                                 fontSize={90}
                                 text={`${this.state.rightScore}`}
                                 wrap="char"
