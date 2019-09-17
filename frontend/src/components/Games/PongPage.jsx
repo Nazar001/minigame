@@ -3,7 +3,10 @@ import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 
-const URL = 'ws://localhost:3030'
+let address = document.URL;
+address = address.replace("http","ws");
+address = address.replace(":3000/", ":3030");
+const URL = address;
 
 let leftData = {
     leftY: document.documentElement.clientHeight / 2 - 45,
@@ -12,12 +15,6 @@ let leftData = {
 let rightData = {
     rightY: document.documentElement.clientHeight / 2 - 45,
 };
-
-
-let leftObj = {};
-let rightObj = {};
-
-// TODO1 localstorage: x,y plates  
 
 class PongPage extends Component {
     state = {
@@ -35,13 +32,11 @@ class PongPage extends Component {
 
     componentDidMount() {
         this.ws.onopen = () => {
-            // on connecting, do nothing but log it to the console
             console.log('connected')
         }
 
         this.ws.onmessage = evt => {
 
-            // on receiving a message, add it to the list of messages
             const message = JSON.parse(evt.data)
             console.log('update');
             this.up(message);
@@ -49,7 +44,6 @@ class PongPage extends Component {
 
         this.ws.onclose = () => {
             console.log('disconnected')
-            // automatically try to reconnect on connection loss
             this.setState({
                 ws: new WebSocket(URL),
             })
@@ -68,9 +62,9 @@ class PongPage extends Component {
             ballY: this.state.ballY,
 
         };
-        if (!ws.readyState) {
+        if (!this.ws.readyState) {
             setTimeout(function () {
-                this.wsSend(JSON.stringify(obj));
+                this.ws.send(JSON.stringify(obj));
             }, 100);
         } else {
             this.ws.send(JSON.stringify(obj));
@@ -92,14 +86,14 @@ class PongPage extends Component {
             ballY: this.state.ballY
         };
 
-        if (!ws.readyState) {
+        if (!this.ws.readyState) {
             setTimeout(function () {
-                this.wsSend(JSON.stringify(obj));
+                this.ws.send(JSON.stringify(obj));
             }, 100);
         } else {
             this.ws.send(JSON.stringify(obj));
         }
-        
+
         this.setState({
             leftY: message,
         });
@@ -128,9 +122,9 @@ class PongPage extends Component {
             ballX: message.ballX,
             ballY: message.ballY
         };
-        if (!ws.readyState) {
+        if (!this.ws.readyState) {
             setTimeout(function () {
-                this.wsSend(JSON.stringify(obj));
+                this.ws.send(JSON.stringify(obj));
             }, 100);
         } else {
             this.ws.send(JSON.stringify(obj));
@@ -179,7 +173,7 @@ class PongPage extends Component {
                 })
             }
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
-                scaleX = -scaleX ;
+                scaleX = -scaleX;
             }
             if (this.state.leftScore === 21) {
                 alert(this.state.leftName + ' wins')
@@ -195,7 +189,6 @@ class PongPage extends Component {
             };
             this.ball(ob);
         })
-
     }
 
     ai = () => {
