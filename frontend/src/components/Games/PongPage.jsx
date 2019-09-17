@@ -18,8 +18,7 @@ let rightData = {
 
 class PongPage extends Component {
     state = {
-        player: 0,
-        place: 1,
+        player: -1,
         leftScore: 0,
         rightScore: 0,
         isPlaying: false,
@@ -35,13 +34,21 @@ class PongPage extends Component {
     componentDidMount() {
         this.ws.onopen = () => {
             console.log('connected')
-        }
-
+        };
         this.ws.onmessage = evt => {
             const message = JSON.parse(evt.data)
-            console.log('update');
-            this.up(message);
-        }
+            if (message === 2) {
+                if (this.state.player === -1) {
+                    this.setState({
+                        player: 2
+                    })
+                };
+            } else {
+                if (this.state.player === 1 || this.state.player === 2) {
+                    this.up(message);
+                };
+            }
+        };
 
         this.ws.onclose = () => {
             console.log('disconnected')
@@ -50,34 +57,7 @@ class PongPage extends Component {
             })
         }
     };
-    /*
-        componentWillMount() {
-            return (
-                <form className="select">
-                    <button>1 player VS AI</button>
-                    <button>2 player on 1 PC</button>
-                    <button onClick={this.handleOnline}>Online</button>
-                </form>
-            );
-        };
-    
-        handleOnline = () => {
-            return (
-                <form>
-                    <button onClick={() => {
-                        this.setState({
-                            player: 1,
-                        });
-                    }}>1-st player</button>
-                    <button onClick={() => {
-                        this.setState({
-                            player: 2,
-                        });
-                    }}>1-nd player</button>
-                </form>
-            )
-        };
-    */
+
     updateRight = (message) => {
         if (this.state.player === 1 || this.state.player === 2) {
             let obj = {
@@ -88,14 +68,15 @@ class PongPage extends Component {
                 leftY: this.state.leftY,
                 ballX: this.state.ballX,
                 ballY: this.state.ballY,
-
             };
 
             if (!this.ws.readyState) {
                 setTimeout(function () {
                     this.ws.send(JSON.stringify(obj));
                 }, 100);
-            };
+            } else {
+                this.ws.send(JSON.stringify(obj));
+            }
         };
 
         this.setState({
@@ -119,7 +100,9 @@ class PongPage extends Component {
                 setTimeout(function () {
                     this.ws.send(JSON.stringify(obj));
                 }, 100);
-            };
+            } else {
+                this.ws.send(JSON.stringify(obj));
+            }
         };
 
         this.setState({
@@ -154,7 +137,9 @@ class PongPage extends Component {
             setTimeout(function () {
                 this.ws.send(JSON.stringify(obj));
             }, 100);
-        };
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
     };
 
     moveBall = () => {
@@ -265,9 +250,9 @@ class PongPage extends Component {
         };
 
         //Левый
-        if (this.state.player === 0 || this.state.player === 1) {
+        if (this.state.player === 0 || this.state.player === 1 || this.state.player === 3) {
             // ВНИЗ!
-            if (e.keyCode === 83)
+            if (e.keyCode === 83) {
                 if (this.Rect.attrs.y < 720 - this.Rect.attrs.height) {
                     this.Rect.to({
                         y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
@@ -277,9 +262,10 @@ class PongPage extends Component {
                         leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
                     })
                     this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
-                }
+                };
+            };
             // ВВЕРХ!
-            if (e.keyCode === 87)
+            if (e.keyCode === 87) {
                 if (this.Rect.attrs.y > 0) {
                     this.Rect.to({
                         y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
@@ -289,9 +275,9 @@ class PongPage extends Component {
                         leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
                     });
                     this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
-
                 }
-        }
+            }
+        };
 
         // Правый
         if (this.state.player === 0 || this.state.player === 2) {
@@ -322,20 +308,43 @@ class PongPage extends Component {
         };
     }
 
-    handleRemove() {
+    handlePlayVsAi = (e) => {
+        e.preventDefault();
+        this.setState({
+            player: 3
+        })
         let tmp = document.getElementById('alpha');
         tmp.remove();
-    }
+    };
+
+    handleHotseat = (e) => {
+        e.preventDefault();
+        this.setState({
+            player: 0
+        })
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
+    };
+
+    handleOnline = (e) => {
+        e.preventDefault();
+        this.ws.send(JSON.stringify(2));
+        this.setState({
+            player: 1
+        })
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
+    };
 
     render() {
         return (
             <div>
                 <form id='alpha' className='settings'>
-                    <button onClick={this.handleRemove}
+                    <button onClick={this.handlePlayVsAi}
                         className='UI'> Player vs AI</button>
-                    <button onClick={this.handleRemove}
+                    <button onClick={this.handleHotseat}
                         className='UI'> Hotseat</button>
-                    <button onClick={this.handleRemove}
+                    <button onClick={this.handleOnline}
                         className='UI'> Online</button>
                 </form>
                 <div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
