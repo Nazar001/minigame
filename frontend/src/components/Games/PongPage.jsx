@@ -4,7 +4,7 @@ import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 
 let address = document.URL;
-address = address.replace("http","ws");
+address = address.replace("http", "ws");
 address = address.replace(":3000/", ":3030");
 const URL = address;
 
@@ -24,8 +24,8 @@ class PongPage extends Component {
         botActive: false,
         leftY: leftData.leftY,
         rightY: rightData.rightY,
-        ballX: 720 / 2 - 5,
-        ballY: 1280 / 2 - 5,
+        ballX: 1280 / 2 - 5,
+        ballY: 720 / 2 - 5,
     }
 
     ws = new WebSocket(URL)
@@ -130,8 +130,8 @@ class PongPage extends Component {
         })
 
         let fieldH = 720;
-        let scaleX = Math.random() * 3;
-        let scaleY = Math.random() * 3;
+        let scaleX = Math.random() * 2.5;
+        let scaleY = Math.random() * 2.5;
         let temp = setInterval(() => {
             if (this.state.botActive) this.ai();
             this.setState({
@@ -139,13 +139,13 @@ class PongPage extends Component {
                 ballY: this.state.ballY += scaleY
             })
             // Мячик по-вертикали
-            if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
+            if (this.state.ballY < 0 || this.state.ballY + 10 > fieldH) {
                 scaleY = -scaleY;
             }
             // Мячик направо
-            if (this.state.ballX > 1280 - 10) {
-                scaleX = Math.random() * -3;
-                scaleY = Math.random() * 3;
+            if (this.state.ballX > 1280 - 20) {
+                scaleX = Math.random() * -2.5;
+                scaleY = Math.random() * 2.5;
                 let temp = this.state.leftScore + 1;
                 this.setState({
                     ballX: 1280 / 2 - 5,
@@ -155,9 +155,9 @@ class PongPage extends Component {
             }
 
             // Мячик налево
-            if (this.state.ballX < 16) {
-                scaleX = Math.random() * 3;
-                scaleY = Math.random() * 3;
+            if (this.state.ballX < 20) {
+                scaleX = Math.random() * 2.5;
+                scaleY = Math.random() * 2.5;
                 let temp = this.state.rightScore + 1;
                 this.setState({
                     ballX: 1280 / 2 - 5,
@@ -277,7 +277,7 @@ class PongPage extends Component {
 
     render() {
         return (
-            <div tabIndex='1' onKeyDown={this.handleKeyDown}>
+            <div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
                 <Stage width={1280} height={720} >
                     <Layer>
                         <Rect
