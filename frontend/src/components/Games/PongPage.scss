@@ -4,9 +4,14 @@
 }
 
 .gameField {
+  z-index: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.select{
+  z-index: 5;
 }
 
 #root {

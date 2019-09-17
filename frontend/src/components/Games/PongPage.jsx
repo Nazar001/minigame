@@ -18,6 +18,8 @@ let rightData = {
 
 class PongPage extends Component {
     state = {
+        player: 0,
+        place: 1,
         leftScore: 0,
         rightScore: 0,
         isPlaying: false,
@@ -36,7 +38,6 @@ class PongPage extends Component {
         }
 
         this.ws.onmessage = evt => {
-
             const message = JSON.parse(evt.data)
             console.log('update');
             this.up(message);
@@ -50,45 +51,76 @@ class PongPage extends Component {
         }
     };
 
+    componentWillMount() {
+        return (
+            <form className="select">
+                <button>1 player VS AI</button>
+                <button>2 player on 1 PC</button>
+                <button onClick={this.handleOnline}>Online</button>
+            </form>
+        );
+    };
+
+    handleOnline = () => {
+        return (
+            <form>
+                <button onClick={() => {
+                    this.setState({
+                        player: 1,
+                    });
+                }}>1-st player</button>
+                <button onClick={() => {
+                    this.setState({
+                        player: 2,
+                    });
+                }}>1-nd player</button>
+            </form>
+        )
+    };
+
     updateRight = (message) => {
+        if (this.state.player === 1 || this.state.player === 2) {
+            let obj = {
+                leftScore: this.state.leftScore,
+                rightScore: this.state.rightScore,
+                rightY: message,
+                isPlaying: this.state.isPlaying,
+                leftY: this.state.leftY,
+                ballX: this.state.ballX,
+                ballY: this.state.ballY,
 
-        let obj = {
-            leftScore: this.state.leftScore,
-            rightScore: this.state.rightScore,
-            rightY: message,
-            isPlaying: this.state.isPlaying,
-            leftY: this.state.leftY,
-            ballX: this.state.ballX,
-            ballY: this.state.ballY,
+            };
 
+            if (!this.ws.readyState) {
+                setTimeout(function () {
+                    this.ws.send(JSON.stringify(obj));
+                }, 100);
+            };
         };
-        if (!this.ws.readyState) {
-            setTimeout(function () {
-                this.ws.send(JSON.stringify(obj));
-            }, 100);
-        }
 
         this.setState({
             rightY: message,
         });
-    }
+    };
 
     updateLeft = (message) => {
-        let obj = {
-            leftY: message,
-            leftScore: this.state.leftScore,
-            rightScore: this.state.rightScore,
-            isPlaying: this.state.isPlaying,
-            rightY: this.state.rightY,
-            ballX: this.state.ballX,
-            ballY: this.state.ballY
-        };
+        if (this.state.player === 1 || this.state.player === 2) {
+            let obj = {
+                leftY: message,
+                leftScore: this.state.leftScore,
+                rightScore: this.state.rightScore,
+                isPlaying: this.state.isPlaying,
+                rightY: this.state.rightY,
+                ballX: this.state.ballX,
+                ballY: this.state.ballY
+            };
 
-        if (!this.ws.readyState) {
-            setTimeout(function () {
-                this.ws.send(JSON.stringify(obj));
-            }, 100);
-        }
+            if (!this.ws.readyState) {
+                setTimeout(function () {
+                    this.ws.send(JSON.stringify(obj));
+                }, 100);
+            };
+        };
 
         this.setState({
             leftY: message,
@@ -117,12 +149,13 @@ class PongPage extends Component {
             ballX: message.ballX,
             ballY: message.ballY
         };
+
         if (!this.ws.readyState) {
             setTimeout(function () {
                 this.ws.send(JSON.stringify(obj));
             }, 100);
-        }
-    }
+        };
+    };
 
     moveBall = () => {
         this.setState({
@@ -164,10 +197,12 @@ class PongPage extends Component {
                     ballY: 720 / 2 - 5,
                     rightScore: temp
                 })
-            }
+            };
+
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
                 scaleX = -scaleX;
-            }
+            };
+
             if (this.state.leftScore === 21) {
                 alert(this.state.leftName + ' wins')
                 clearInterval(temp);
@@ -175,12 +210,15 @@ class PongPage extends Component {
             else if (this.state.rightScore === 21) {
                 alert(this.state.rightName + ' wins')
                 clearInterval(temp);
-            }
-            let ob = {
-                ballX: this.state.ballX += scaleX,
-                ballY: this.state.ballY += scaleY
             };
-            this.ball(ob);
+            
+            if (this.state.player === 1 || this.state.player === 2) {
+                let ob = {
+                    ballX: this.state.ballX += scaleX,
+                    ballY: this.state.ballY += scaleY
+                };
+                this.ball(ob);
+            };
         })
     }
 
@@ -214,65 +252,74 @@ class PongPage extends Component {
     }
 
     handleKeyDown = e => {
-        if (e.keyCode === 107) this.setState({
-            botActive: !this.state.botActive
-        })
+        if (this.state.player === 3) {
+            this.setState({
+                botActive: !this.state.botActive
+            });
+        };
 
-        if (e.keyCode === 32)
-            if (this.state.isPlaying === false)
-                this.moveBall()
+        if (e.keyCode === 32) {
+            if (this.state.isPlaying === false) {
+                this.moveBall();
+            }
+        };
+
         //Левый
-        // ВНИЗ!
-        if (e.keyCode === 83)
-            if (this.Rect.attrs.y < 720 - this.Rect.attrs.height) {
-                this.Rect.to({
-                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
-                })
-                this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
-            }
-        // ВВЕРХ!
-        if (e.keyCode === 87)
-            if (this.Rect.attrs.y > 0) {
-                this.Rect.to({
-                    y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
-                });
-                this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
+        if (this.state.player === 0 || this.state.player === 1) {
+            // ВНИЗ!
+            if (e.keyCode === 83)
+                if (this.Rect.attrs.y < 720 - this.Rect.attrs.height) {
+                    this.Rect.to({
+                        y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
+                    })
+                    this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
+                }
+            // ВВЕРХ!
+            if (e.keyCode === 87)
+                if (this.Rect.attrs.y > 0) {
+                    this.Rect.to({
+                        y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
+                    });
+                    this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
 
-            }
+                }
+        }
 
         // Правый
-        // ВНИЗ!
-        if (e.keyCode === 40)
-            if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height) {
-                this.Rectangle.to({
-                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
-                })
-                this.updateRight(this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3)
-            }
-        // ВВЕРХ!
-        if (e.keyCode === 38)
-            if (this.Rectangle.attrs.y > 0) {
-                this.Rectangle.to({
-                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
-                })
-                this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
-            }
+        if (this.state.player === 0 || this.state.player === 2) {
+            // ВНИЗ!
+            if (e.keyCode === 40)
+                if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height) {
+                    this.Rectangle.to({
+                        y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
+                    })
+                    this.updateRight(this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3)
+                };
+            // ВВЕРХ!
+            if (e.keyCode === 38)
+                if (this.Rectangle.attrs.y > 0) {
+                    this.Rectangle.to({
+                        y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
+                    })
+                    this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
+                };
+        };
     };
 
     render() {
