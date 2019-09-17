@@ -50,34 +50,34 @@ class PongPage extends Component {
             })
         }
     };
-
-    componentWillMount() {
-        return (
-            <form className="select">
-                <button>1 player VS AI</button>
-                <button>2 player on 1 PC</button>
-                <button onClick={this.handleOnline}>Online</button>
-            </form>
-        );
-    };
-
-    handleOnline = () => {
-        return (
-            <form>
-                <button onClick={() => {
-                    this.setState({
-                        player: 1,
-                    });
-                }}>1-st player</button>
-                <button onClick={() => {
-                    this.setState({
-                        player: 2,
-                    });
-                }}>1-nd player</button>
-            </form>
-        )
-    };
-
+    /*
+        componentWillMount() {
+            return (
+                <form className="select">
+                    <button>1 player VS AI</button>
+                    <button>2 player on 1 PC</button>
+                    <button onClick={this.handleOnline}>Online</button>
+                </form>
+            );
+        };
+    
+        handleOnline = () => {
+            return (
+                <form>
+                    <button onClick={() => {
+                        this.setState({
+                            player: 1,
+                        });
+                    }}>1-st player</button>
+                    <button onClick={() => {
+                        this.setState({
+                            player: 2,
+                        });
+                    }}>1-nd player</button>
+                </form>
+            )
+        };
+    */
     updateRight = (message) => {
         if (this.state.player === 1 || this.state.player === 2) {
             let obj = {
@@ -211,7 +211,7 @@ class PongPage extends Component {
                 alert(this.state.rightName + ' wins')
                 clearInterval(temp);
             };
-            
+
             if (this.state.player === 1 || this.state.player === 2) {
                 let ob = {
                     ballX: this.state.ballX += scaleX,
@@ -320,90 +320,105 @@ class PongPage extends Component {
                     this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
                 };
         };
-    };
+    }
+
+    handleRemove() {
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
+    }
 
     render() {
         return (
-            <div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
-                <Stage width={1280} height={720} >
-                    <Layer>
-                        <Rect
-                            x={0}
-                            y={0}
-                            width={1280}
-                            height={720}
-                            fill='green'
-                        />
-                        <Rect
-                            x={1280 / 2 - 10}
-                            y={0}
-                            width={10}
-                            height={720}
-                            fill='white'
-                            opacity={0.8}
-                        />
-                    </Layer>
-                    <Layer key="ballLayer">
-                        <Circle
-                            ref={node => {
-                                this.Circle = node;
-                            }}
-                            x={this.state.ballX}
-                            y={this.state.ballY}
-                            radius={10}
-                            fill="white"
-                        />
-                        <Rect
-                            id='leftPlayer'
-                            ref={node => {
-                                this.Rect = node;
-                            }}
-                            x={20}
-                            y={this.state.leftY}
-                            width={15}
-                            height={90}
-                            fill='black'
-                            onKeyDown={this.handleKeyDown}
-                        />
-                        <Rect
-                            id='rightPlayer'
-                            ref={node => {
-                                this.Rectangle = node;
-                            }}
-                            x={1280 - 35}
-                            y={this.state.rightY}
-                            width={15}
-                            height={90}
-                            fill='black'
-                        />
-                    </Layer>
-                    <Layer>
-                        <Label>
-                            <Text
-                                x={1280 / 2 - 120}
-                                fontSize={90}
-                                text={`${this.state.leftScore}`}
-                                wrap="char"
-                                align="center"
+            <div>
+                <form id='alpha' className='settings'>
+                    <button onClick={this.handleRemove}
+                        className='UI'> Player vs AI</button>
+                    <button onClick={this.handleRemove}
+                        className='UI'> Hotseat</button>
+                    <button onClick={this.handleRemove}
+                        className='UI'> Online</button>
+                </form>
+                <div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
+                    <Stage width={1280} height={720} >
+                        <Layer>
+                            <Rect
+                                x={0}
+                                y={0}
+                                width={1280}
+                                height={720}
+                                fill='green'
                             />
-                            <Text
-                                x={1280 / 2 - 43}
-                                fontSize={90}
-                                text=' : '
-                                wrap="char"
-                                align="center"
+                            <Rect
+                                x={1280 / 2 - 10}
+                                y={0}
+                                width={10}
+                                height={720}
+                                fill='white'
+                                opacity={0.8}
                             />
-                            <Text
-                                x={1280 / 2 + 30}
-                                fontSize={90}
-                                text={`${this.state.rightScore}`}
-                                wrap="char"
-                                align="center"
+                        </Layer>
+                        <Layer key="ballLayer">
+                            <Circle
+                                ref={node => {
+                                    this.Circle = node;
+                                }}
+                                x={this.state.ballX}
+                                y={this.state.ballY}
+                                radius={10}
+                                fill="white"
                             />
-                        </Label>
-                    </Layer>
-                </Stage >
-            </div>
+                            <Rect
+                                id='leftPlayer'
+                                ref={node => {
+                                    this.Rect = node;
+                                }}
+                                x={20}
+                                y={this.state.leftY}
+                                width={15}
+                                height={90}
+                                fill='black'
+                                onKeyDown={this.handleKeyDown}
+                            />
+                            <Rect
+                                id='rightPlayer'
+                                ref={node => {
+                                    this.Rectangle = node;
+                                }}
+                                x={1280 - 35}
+                                y={this.state.rightY}
+                                width={15}
+                                height={90}
+                                fill='black'
+                            />
+                        </Layer>
+                        <Layer>
+                            <Label>
+                                <Text
+                                    x={1280 / 2 - 120}
+                                    fontSize={90}
+                                    text={`${this.state.leftScore}`}
+                                    wrap="char"
+                                    align="center"
+                                />
+                                <Text
+                                    x={1280 / 2 - 43}
+                                    fontSize={90}
+                                    text=' : '
+                                    wrap="char"
+                                    align="center"
+                                />
+                                <Text
+                                    x={1280 / 2 + 30}
+                                    fontSize={90}
+                                    text={`${this.state.rightScore}`}
+                                    wrap="char"
+                                    align="center"
+                                />
+                            </Label>
+                        </Layer>
+                    </Stage >
+                </div>
+            </div >
         );
     }
 }
