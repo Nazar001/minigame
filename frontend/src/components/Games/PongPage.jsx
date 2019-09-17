@@ -68,7 +68,14 @@ class PongPage extends Component {
             ballY: this.state.ballY,
 
         };
-        this.ws.send(JSON.stringify(obj));
+        if (!ws.readyState) {
+            setTimeout(function () {
+                this.wsSend(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
+
         this.setState({
             rightY: message,
         });
@@ -84,7 +91,15 @@ class PongPage extends Component {
             ballX: this.state.ballX,
             ballY: this.state.ballY
         };
-        this.ws.send(JSON.stringify(obj));
+
+        if (!ws.readyState) {
+            setTimeout(function () {
+                this.wsSend(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
+        
         this.setState({
             leftY: message,
         });
@@ -113,7 +128,13 @@ class PongPage extends Component {
             ballX: message.ballX,
             ballY: message.ballY
         };
-        this.ws.send(JSON.stringify(obj));
+        if (!ws.readyState) {
+            setTimeout(function () {
+                this.wsSend(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
     }
 
     moveBall = () => {
@@ -158,7 +179,7 @@ class PongPage extends Component {
                 })
             }
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
-                scaleX = -scaleX * 1.1;
+                scaleX = -scaleX ;
             }
             if (this.state.leftScore === 21) {
                 alert(this.state.leftName + ' wins')
@@ -215,7 +236,7 @@ class PongPage extends Component {
             return false;
     }
 
-    handleKeyUp = e => {
+    handleKeyDown = e => {
         if (e.keyCode === 107) this.setState({
             botActive: !this.state.botActive
         })
@@ -279,7 +300,7 @@ class PongPage extends Component {
 
     render() {
         return (
-            <div tabIndex='1' onKeyUp={this.handleKeyUp}>
+            <div tabIndex='1' onKeyDown={this.handleKeyDown}>
                 <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
                     <Layer>
                         <Rect
@@ -318,7 +339,7 @@ class PongPage extends Component {
                             width={15}
                             height={90}
                             fill='black'
-                            onKeyUp={this.handleKeyUp}
+                            onKeyDown={this.handleKeyDown}
                         />
                         <Rect
                             id='rightPlayer'
