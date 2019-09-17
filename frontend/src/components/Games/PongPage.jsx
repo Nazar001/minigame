@@ -22,15 +22,15 @@ let rightObj = {};
 class PongPage extends Component {
     state = {
         ballDirection: false,
-        ballX: document.documentElement.clientWidth / 2 - 5,
-        ballY: document.documentElement.clientHeight / 2 - 5,
-        isPlaying: true,
-        botActive: false,
 
-        //left
-        leftY: leftData.leftY,
-        //right
-        rightY: rightData.rightY
+        isPlaying: false,
+        botActive: false,
+        play: {
+            leftY: leftData.leftY,
+            rightY: rightData.rightY,
+            ballX: document.documentElement.clientWidth / 2 - 5,
+            ballY: document.documentElement.clientHeight / 2 - 5,
+        }
     }
 
     ws = new WebSocket(URL)
@@ -46,8 +46,7 @@ class PongPage extends Component {
             // on receiving a message, add it to the list of messages
             const message = JSON.parse(evt.data)
             console.log('update');
-
-            this.updateLeft(message);
+            this.up(message);
         }
 
         this.ws.onclose = () => {
@@ -59,20 +58,56 @@ class PongPage extends Component {
         }
     };
 
-    updateRight = () => {
+    updateRight = (message) => {
+        debugger
+        let obj = {
+            rightY: message,
+            leftY: this.state.play.leftY,
+            ballX: this.state.play.ballX,
+            ballY: this.state.play.ballY
+        };
+        this.ws.send(JSON.stringify(obj));
         this.setState({
-            //right
-            rightY: rightData.rightY
-        })
+            play: {
+                rightY: message,
+                leftY: this.state.play.leftY,
+                ballX: this.state.play.ballX,
+                ballY: this.state.play.ballY
+            }
+        });
     }
 
     updateLeft = (message) => {
-        this.ws.send(JSON.stringify(message))
+        debugger
+        let obj = {
+            leftY: message,
+            rightY: this.state.play.rightY,
+            ballX: this.state.play.ballX,
+            ballY: this.state.play.ballY
+        };
+        this.ws.send(JSON.stringify(obj));
         this.setState({
-            leftY: message
-        })
+            play: {
+                leftY: message,
+                rightY: this.state.play.rightY,
+                ballX: this.state.play.ballX,
+                ballY: this.state.play.ballY
+            }
+        });
     }
-    
+
+    up = (message) => {
+        debugger
+        this.setState({
+            play: {
+                leftY: message.leftY,
+                rightY: message.rightY,
+                ballX: message.ballX,
+                ballY: message.ballY
+            }
+        })
+    };
+
     moveBall = () => {
         this.setState({
             isPlaying: true
@@ -84,8 +119,12 @@ class PongPage extends Component {
         let temp = setInterval(() => {
             if (this.state.botActive) this.ai();
             this.setState({
-                ballX: this.state.ballX += scaleX,
-                ballY: this.state.ballY += scaleY
+                play: {
+                    leftY: this.state.play.leftY,
+                    rightY: this.state.play.rightY,
+                    ballX: this.state.ballX += scaleX,
+                    ballY: this.state.ballY += scaleY
+                }
             })
             // Мячик по-вертикали
             if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
@@ -97,8 +136,12 @@ class PongPage extends Component {
                 scaleY = Math.random() * 3;
                 let temp = this.state.leftScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    play: {
+                        leftY: this.state.play.leftY,
+                        rightY: this.state.play.rightY,
+                        ballX: document.documentElement.clientWidth / 2 - 5,
+                        ballY: document.documentElement.clientHeight / 2 - 5
+                    },
                     leftScore: temp
                 })
                 leftObj = {
@@ -114,8 +157,12 @@ class PongPage extends Component {
                 scaleY = Math.random() * 3;
                 let temp = this.state.rightScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    play: {
+                        leftY: this.state.play.leftY,
+                        rightY: this.state.play.rightY,
+                        ballX: document.documentElement.clientWidth / 2 - 5,
+                        ballY: document.documentElement.clientHeight / 2 - 5
+                    },
                     rightScore: temp
                 })
                 rightObj = {
@@ -176,28 +223,29 @@ class PongPage extends Component {
             return false;
     }
 
-    handleKeyDown = e => {
+    handleKeyUp = e => {
         if (e.keyCode === 107) this.setState({
             botActive: !this.state.botActive
         })
 
         if (e.keyCode === 32)
             if (this.state.isPlaying === false)
-                // this.moveBall()
-                //Левый
-                // ВНИЗ!
-                if (e.keyCode === 83)
-                    debugger
-        if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
-            this.Rect.to({
-                y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
-                duration: 0.06
-            })
-            this.setState({
-                leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
-            })
-            this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
-        }
+                this.moveBall()
+        //Левый
+        // ВНИЗ!
+        if (e.keyCode === 83)
+            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
+                this.Rect.to({
+                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
+                    duration: 0.06
+                })
+                this.setState({
+                    play: {
+                        leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
+                    }
+                })
+                this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
+            }
         // ВВЕРХ!
         if (e.keyCode === 87)
             if (this.Rect.attrs.y > 0) {
@@ -206,8 +254,10 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
-                })
+                    play: {
+                        leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
+                    }
+                });
                 this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
 
             }
@@ -221,12 +271,11 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
+                    play: {
+                        rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
+                    }
                 })
-                rightObj = {
-                    rightY: this.state.rightY
-                }
-                this.updateRight()
+                this.updateRight(this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3)
             }
         // ВВЕРХ!
         if (e.keyCode === 38)
@@ -236,18 +285,17 @@ class PongPage extends Component {
                     duration: 0.06
                 })
                 this.setState({
-                    rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
+                    play: {
+                        rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
+                    }
                 })
-                rightObj = {
-                    rightY: this.state.rightY
-                }
-                this.updateRight()
+                this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
             }
     };
 
     render() {
         return (
-            <div tabIndex='1' onKeyDown={this.handleKeyDown}>
+            <div tabIndex='1' onKeyUp={this.handleKeyUp}>
                 <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
                     <Layer>
                         <Rect
@@ -271,8 +319,8 @@ class PongPage extends Component {
                             ref={node => {
                                 this.Circle = node;
                             }}
-                            x={this.state.ballX}
-                            y={this.state.ballY}
+                            x={this.state.play.ballX}
+                            y={this.state.play.ballY}
                             radius={16}
                             fill="white"
                         />
@@ -282,11 +330,11 @@ class PongPage extends Component {
                                 this.Rect = node;
                             }}
                             x={20}
-                            y={this.state.leftY}
+                            y={this.state.play.leftY}
                             width={15}
                             height={90}
                             fill='black'
-                            onKeyDown={this.handleKeyDown}
+                            onKeyUp={this.handleKeyUp}
                         />
                         <Rect
                             id='rightPlayer'
@@ -294,7 +342,7 @@ class PongPage extends Component {
                                 this.Rectangle = node;
                             }}
                             x={document.documentElement.clientWidth - 35}
-                            y={this.state.rightY}
+                            y={this.state.play.rightY}
                             width={15}
                             height={90}
                             fill='black'
