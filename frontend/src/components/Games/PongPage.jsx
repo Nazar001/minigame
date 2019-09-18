@@ -38,13 +38,13 @@ class PongPage extends Component {
         this.ws.onmessage = evt => {
             const message = JSON.parse(evt.data)
             if (message === 2) {
-                if (this.state.player === -1) {
+                if (this.state.player === 1) {
                     this.setState({
                         player: 2
                     })
                 };
             } else {
-                if (this.state.player === 1 || this.state.player === 2) {
+                if (  this.state.player === 2) {
                     this.up(message);
                 };
             }
