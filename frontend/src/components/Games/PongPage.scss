@@ -36,3 +36,22 @@ body{}
   justify-content: center;
   align-items: center;
 }
+
+.div-btn{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.btn {
+  width: 50%;
+}
+
+.ant-message {
+  font-size: 40px;
+}
+
+.ant-message span div div div i svg{
+  height: 34px !important;
+  width: 34px !important;
+}

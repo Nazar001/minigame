@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
+import { message } from 'antd';
 
 let address = document.URL;
 address = address.replace("http", "ws");
@@ -37,24 +38,39 @@ class PongPage extends Component {
             console.log('connected')
         };
         this.ws.onmessage = evt => {
-            const message = JSON.parse(evt.data)
-            if (message === 1) {
+            const message1 = JSON.parse(evt.data)
+            if (message1 === 1) {
                 if (this.state.player === 2) {
                     this.setState({
                         player: 1
                     })
+                    message.info("Press space to start the game!");
+                    this.ws.send(JSON.stringify(604));
                 };
+            } else if (message1 === 404 && (this.state.player === 1 || this.state.player === 2)) {
+                this.ws.send(JSON.stringify(504));
+                message.success("You WIN!!!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else if (message1 === 504) {
+                alert("You lose!!!");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            } else if (message1 === 604) {
+                message.info("The game may be started by first player");
             } else {
                 if (this.state.player === 1 || this.state.player === 2) {
-                    this.up(message);
+                    this.up(message1);
                 };
             }
         };
-        if ((this.state.player === 1 || this.restart.player === 2 ) && (this.state.leftScore === 0 && this.state.leftScore === 0 && this.state.isPlaying === false)){
+        if ((this.state.player === 1 || this.restart.player === 2) && (this.state.leftScore === 0 && this.state.leftScore === 0 && this.state.isPlaying === false)) {
             if (this.state.player === 1) {
-                alert("Вы играете за игрока слева");
+                message.info("Вы играете за игрока слева");
             } else {
-                alert("Вы играете за игрока справа");
+                message.info("Вы играете за игрока справа");
             }
         };
 
@@ -65,6 +81,8 @@ class PongPage extends Component {
             })
         }
     };
+
+
 
     updateRight = (message) => {
         if (this.state.player === 1 || this.state.player === 2) {
@@ -249,7 +267,7 @@ class PongPage extends Component {
     handleKeyDown = e => {
 
         if (e.keyCode === 32) {
-            if (this.state.isPlaying === false) {
+            if (this.state.isPlaying === false && (this.state.player === 1 || this.state.player === 3 || this.state.player === 0)) {
                 this.moveBall();
             }
         }
@@ -313,7 +331,7 @@ class PongPage extends Component {
 
     handlePlayVsAi = (e) => {
         e.preventDefault();
-
+        document.getElementById("gameField").focus();
         this.setState({
             botActive: !this.state.botActive,
             player: 3
@@ -324,6 +342,7 @@ class PongPage extends Component {
 
     handleHotseat = (e) => {
         e.preventDefault();
+        document.getElementById("gameField").focus();
         this.setState({
             player: 0
         })
@@ -333,6 +352,7 @@ class PongPage extends Component {
 
     handleOnline = (e) => {
         e.preventDefault();
+        document.getElementById("gameField").focus();
         this.ws.send(JSON.stringify(1));
         this.setState({
             player: 2
@@ -341,7 +361,9 @@ class PongPage extends Component {
         tmp.remove();
     };
     restart = () => {
-
+        if (this.state.isPlaying && (this.state.player === 1 || this.state.player === 2)) {
+            this.ws.send(JSON.stringify(404));
+        }
         this.setState({
             leftScore: 0,
             rightScore: 0,
@@ -369,8 +391,22 @@ class PongPage extends Component {
         } else {
             this.ws.send(JSON.stringify(obj));
         }
+    };
+
+    back = () => {
+        if (this.state.isPlaying && (this.state.player === 1 || this.state.player === 2)) {
+            this.ws.send(JSON.stringify(404));
+        }
+        window.location.reload();
     }
+
+
     render() {
+        window.onbeforeunload = () => {
+            if (this.state.isPlaying && (this.state.player === 1 || this.state.player === 2)) {
+                this.ws.send(JSON.stringify(404));
+            };
+        };
         return (
             <div>
                 <form id='alpha' className='settings'>
@@ -381,7 +417,7 @@ class PongPage extends Component {
                     <button onClick={this.handleOnline}
                         className='UI'> Online</button>
                 </form>
-                < div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
+                < div className='gameField' id="gameField" tabIndex='1' onKeyDown={this.handleKeyDown}>
                     <Stage width={1280} height={720} >
                         <Layer>
                             <Rect
@@ -461,7 +497,10 @@ class PongPage extends Component {
                         </Layer>
                     </Stage >
                 </div >
-                <button className='restart' onClick={this.restart}>Restart</button>
+                <div className="div-btn">
+                    <button className='restart btn' onClick={this.restart}>Restart</button>
+                    <button className='back btn' onClick={this.back}>Back to menu</button>
+                </div>
             </div >
         );
     }
