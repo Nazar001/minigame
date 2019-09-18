@@ -151,6 +151,8 @@ class PongPage extends Component {
         let scaleX = Math.random() * 2.5;
         let scaleY = Math.random() * 2.5;
         let temp = setInterval(() => {
+            if (this.state.isPlaying === false) clearInterval(temp);
+            if (this.state.player === 3) this.setState({ botActive: true })
             if (this.state.botActive) this.ai();
             this.setState({
                 ballX: this.state.ballX += scaleX,
@@ -237,18 +239,12 @@ class PongPage extends Component {
     }
 
     handleKeyDown = e => {
-        if (this.state.player === 3) {
-            this.setState({
-                botActive: !this.state.botActive
-            });
-        };
 
         if (e.keyCode === 32) {
             if (this.state.isPlaying === false) {
                 this.moveBall();
             }
-        };
-
+        }
         //Левый
         if (this.state.player === 0 || this.state.player === 1 || this.state.player === 3) {
             // ВНИЗ!
@@ -277,8 +273,7 @@ class PongPage extends Component {
                     this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
                 }
             }
-        };
-
+        }
         // Правый
         if (this.state.player === 0 || this.state.player === 2) {
             // ВНИЗ!
@@ -310,7 +305,9 @@ class PongPage extends Component {
 
     handlePlayVsAi = (e) => {
         e.preventDefault();
+
         this.setState({
+            botActive: !this.state.botActive,
             player: 3
         })
         let tmp = document.getElementById('alpha');
@@ -335,7 +332,36 @@ class PongPage extends Component {
         let tmp = document.getElementById('alpha');
         tmp.remove();
     };
+    restart = () => {
 
+        this.setState({
+            leftScore: 0,
+            rightScore: 0,
+            isPlaying: false,
+            botActive: false,
+            leftY: leftData.leftY,
+            rightY: rightData.rightY,
+            ballX: 1280 / 2 - 5,
+            ballY: 720 / 2 - 5,
+        })
+        let obj = {
+            leftScore: 0,
+            rightScore: 0,
+            isPlaying: false,
+            botActive: false,
+            leftY: 720 / 2 - 45,
+            rightY: 720 / 2 - 45,
+            ballX: 1280 / 2 - 5,
+            ballY: 720 / 2 - 5,
+        }
+        if (!this.ws.readyState) {
+            setTimeout(function () {
+                this.ws.send(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
+    }
     render() {
         return (
             <div>
@@ -347,7 +373,8 @@ class PongPage extends Component {
                     <button onClick={this.handleOnline}
                         className='UI'> Online</button>
                 </form>
-                <div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
+                <text>{(this.state.player === 2 || this.state.player === 1) ? ('You are ' + this.state.player + ' player') : (' ')}</text>
+                < div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
                     <Stage width={1280} height={720} >
                         <Layer>
                             <Rect
@@ -426,7 +453,8 @@ class PongPage extends Component {
                             </Label>
                         </Layer>
                     </Stage >
-                </div>
+                </div >
+                <button className='restart' onClick={this.restart}>Restart</button>
             </div >
         );
     }
