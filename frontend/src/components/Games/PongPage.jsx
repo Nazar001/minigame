@@ -3,126 +3,201 @@ import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 
+let address = document.URL;
+address = address.replace("http", "ws");
+address = address.replace(":3000/", ":3030");
+const URL = address;
+
 let leftData = {
-    leftName: 'Biba',
-    leftScore: 0,
-    leftY: document.documentElement.clientHeight / 2 - 45,
+    leftY: 720 / 2 - 45,
 };
-window.localStorage.setItem('leftData', JSON.stringify(leftData));
 
 let rightData = {
-    rightName: 'Boba',
-    rightScore: 0,
-    rightY: document.documentElement.clientHeight / 2 - 45,
+    rightY: 720 / 2 - 45,
 };
-window.localStorage.setItem('rightData', JSON.stringify(rightData));
-
-
-let leftObj = {};
-let rightObj = {};
-
-// TODO1 localstorage: x,y plates  
 
 class PongPage extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            ballDirection: false,
-            ballX: document.documentElement.clientWidth / 2 - 5,
-            ballY: document.documentElement.clientHeight / 2 - 5,
-            isPlaying: false,
-            botActive: false,
+    state = {
+        player: -1,
+        leftScore: 0,
+        rightScore: 0,
+        isPlaying: false,
+        botActive: false,
+        leftY: leftData.leftY,
+        rightY: rightData.rightY,
+        ballX: 1280 / 2 - 5,
+        ballY: 720 / 2 - 5,
+    }
 
-            //left
-            leftName: leftData.leftName,
-            leftScore: leftData.leftScore,
-            leftY: leftData.leftY,
-            //right
-            rightName: rightData.rightName,
-            rightScore: rightData.rightScore,
-            rightY: rightData.rightY,
+    ws = new WebSocket(URL)
+
+    componentDidMount() {
+        document.title = "PingPong";
+        this.ws.onopen = () => {
+            console.log('connected')
+        };
+        this.ws.onmessage = evt => {
+            const message = JSON.parse(evt.data)
+            if (message === 1) {
+                if (this.state.player === 2) {
+                    this.setState({
+                        player: 1
+                    })
+                };
+            } else {
+                if (this.state.player === 1 || this.state.player === 2) {
+                    this.up(message);
+                };
+            }
+        };
+        if ((this.state.player === 1 || this.restart.player === 2 ) && (this.state.leftScore === 0 && this.state.leftScore === 0 && this.state.isPlaying === false)){
+            if (this.state.player === 1) {
+                alert("Вы играете за игрока слева");
+            } else {
+                alert("Вы играете за игрока справа");
+            }
+        };
+
+        this.ws.onclose = () => {
+            console.log('disconnected')
+            this.setState({
+                ws: new WebSocket(URL),
+            })
         }
-    }
-    updateRight = () => {
-        let rightData = JSON.parse(window.localStorage.getItem('rightData'))
+    };
+
+    updateRight = (message) => {
+        if (this.state.player === 1 || this.state.player === 2) {
+            let obj = {
+                leftScore: this.state.leftScore,
+                rightScore: this.state.rightScore,
+                rightY: message,
+                isPlaying: this.state.isPlaying,
+                leftY: this.state.leftY,
+                ballX: this.state.ballX,
+                ballY: this.state.ballY,
+            };
+
+            if (!this.ws.readyState) {
+                setTimeout(function () {
+                    this.ws.send(JSON.stringify(obj));
+                }, 100);
+            } else {
+                this.ws.send(JSON.stringify(obj));
+            }
+        };
+
         this.setState({
-            //right
-            rightName: rightData.rightName,
-            rightScore: rightData.rightScore,
-            rightY: rightData.rightY,
-        })
-        window.localStorage.setItem('rightData', JSON.stringify(rightData));
+            rightY: message,
+        });
+    };
+
+    updateLeft = (message) => {
+        if (this.state.player === 1 || this.state.player === 2) {
+            let obj = {
+                leftY: message,
+                leftScore: this.state.leftScore,
+                rightScore: this.state.rightScore,
+                isPlaying: this.state.isPlaying,
+                rightY: this.state.rightY,
+                ballX: this.state.ballX,
+                ballY: this.state.ballY
+            };
+
+            if (!this.ws.readyState) {
+                setTimeout(function () {
+                    this.ws.send(JSON.stringify(obj));
+                }, 100);
+            } else {
+                this.ws.send(JSON.stringify(obj));
+            }
+        };
+
+        this.setState({
+            leftY: message,
+        });
     }
 
-    updateLeft = () => {
-        let leftData = JSON.parse(window.localStorage.getItem('leftData'))
+    up = (message) => {
         this.setState({
-            //left
-            leftName: leftData.leftName,
-            leftScore: leftData.leftScore,
-            leftY: leftData.leftY,
+            leftScore: message.leftScore,
+            rightScore: message.rightScore,
+            leftY: message.leftY,
+            rightY: message.rightY,
+            isPlaying: message.isPlaying,
+            ballX: message.ballX,
+            ballY: message.ballY
         })
-        window.localStorage.setItem('leftData', JSON.stringify(leftData));
+    };
 
-    }
+    ball = (message) => {
+        let obj = {
+            leftY: this.state.leftY,
+            leftScore: this.state.leftScore,
+            rightScore: this.state.rightScore,
+            isPlaying: this.state.isPlaying,
+            rightY: this.state.rightY,
+            ballX: message.ballX,
+            ballY: message.ballY
+        };
+
+        if (!this.ws.readyState) {
+            setTimeout(function () {
+                this.ws.send(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
+    };
+
     moveBall = () => {
         this.setState({
             isPlaying: true
         })
 
-        let fieldH = document.documentElement.clientHeight;
-        let scaleX = Math.random() * 3;
-        let scaleY = Math.random() * 3;
+        let fieldH = 720;
+        let scaleX = Math.random() * 2.5;
+        let scaleY = Math.random() * 2.5;
         let temp = setInterval(() => {
+            if (this.state.isPlaying === false) clearInterval(temp);
+            if (this.state.player === 3) this.setState({ botActive: true })
             if (this.state.botActive) this.ai();
             this.setState({
                 ballX: this.state.ballX += scaleX,
                 ballY: this.state.ballY += scaleY
             })
             // Мячик по-вертикали
-            if (this.state.ballY < 0 || this.state.ballY + 20 > fieldH) {
+            if (this.state.ballY < 0 || this.state.ballY + 10 > fieldH) {
                 scaleY = -scaleY;
             }
             // Мячик направо
-            if (this.state.ballX > document.documentElement.clientWidth - 16) {
-                scaleX = Math.random() * -3;
-                scaleY = Math.random() * 3;
+            if (this.state.ballX > 1280 - 20) {
+                scaleX = Math.random() * -2.5;
+                scaleY = Math.random() * 2.5;
                 let temp = this.state.leftScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    ballX: 1280 / 2 - 5,
+                    ballY: 720 / 2 - 5,
                     leftScore: temp
                 })
-                leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
-                }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
             }
 
             // Мячик налево
-            if (this.state.ballX < 16) {
-                scaleX = Math.random() * 3;
-                scaleY = Math.random() * 3;
+            if (this.state.ballX < 20) {
+                scaleX = Math.random() * 2.5;
+                scaleY = Math.random() * 2.5;
                 let temp = this.state.rightScore + 1;
                 this.setState({
-                    ballX: document.documentElement.clientWidth / 2 - 5,
-                    ballY: document.documentElement.clientHeight / 2 - 5,
+                    ballX: 1280 / 2 - 5,
+                    ballY: 720 / 2 - 5,
                     rightScore: temp
                 })
-                rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
-                }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
-                this.updateRight()
-            }
+            };
+
             if (this.touch(this.Circle, this.Rect) === true || this.touch(this.Circle, this.Rectangle) === true) {
-                scaleX = -scaleX * 1.1;
-            }
+                scaleX = -scaleX;
+            };
+
             if (this.state.leftScore === 21) {
                 alert(this.state.leftName + ' wins')
                 clearInterval(temp);
@@ -130,9 +205,16 @@ class PongPage extends Component {
             else if (this.state.rightScore === 21) {
                 alert(this.state.rightName + ' wins')
                 clearInterval(temp);
-            }
-        })
+            };
 
+            if (this.state.player === 1 || this.state.player === 2) {
+                let ob = {
+                    ballX: this.state.ballX += scaleX,
+                    ballY: this.state.ballY += scaleY
+                };
+                this.ball(ob);
+            };
+        })
     }
 
     ai = () => {
@@ -145,7 +227,7 @@ class PongPage extends Component {
                 })
         }
         else {
-            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height)
+            if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height)
                 this.Rectangle.to({
                     x: this.Rectangle.attrs.x,
                     y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 2,
@@ -163,184 +245,224 @@ class PongPage extends Component {
         else
             return false;
     }
-    touch = (a, b) => {
-        if (a.attrs.x + a.attrs.radius > b.attrs.x &&
-            a.attrs.x < b.attrs.x + b.attrs.width &&
-            a.attrs.y + a.attrs.radius > b.attrs.y &&
-            a.attrs.y < b.attrs.y + b.attrs.height)
-            return true;
-        else
-            return false;
-    }
 
     handleKeyDown = e => {
-        if (e.keyCode === 107) this.setState({
-            botActive: !this.state.botActive
-        })
 
-        if (e.keyCode === 32)
-            if (this.state.isPlaying === false)
-                this.moveBall()
+        if (e.keyCode === 32) {
+            if (this.state.isPlaying === false) {
+                this.moveBall();
+            }
+        }
         //Левый
-        // ВНИЗ!
-        if (e.keyCode === 83)
-            if (this.Rect.attrs.y < document.documentElement.clientHeight - this.Rect.attrs.height) {
-                this.Rect.to({
-                    y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
-                })
-                leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
+        if (this.state.player === 0 || this.state.player === 1 || this.state.player === 3) {
+            // ВНИЗ!
+            if (e.keyCode === 83) {
+                if (this.Rect.attrs.y < 720 - this.Rect.attrs.height) {
+                    this.Rect.to({
+                        y: this.Rect.attrs.y + this.Rect.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        leftY: this.Rect.attrs.y + this.Rect.attrs.height / 3
+                    })
+                    this.updateLeft(this.Rect.attrs.y + this.Rect.attrs.height / 3)
+                };
+            };
+            // ВВЕРХ!
+            if (e.keyCode === 87) {
+                if (this.Rect.attrs.y > 0) {
+                    this.Rect.to({
+                        y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
+                    });
+                    this.updateLeft(this.Rect.attrs.y - this.Rect.attrs.height / 3)
                 }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
             }
-        // ВВЕРХ!
-        if (e.keyCode === 87)
-            if (this.Rect.attrs.y > 0) {
-                this.Rect.to({
-                    y: this.Rect.attrs.y - this.Rect.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    leftY: this.Rect.attrs.y - this.Rect.attrs.height / 3
-                })
-                leftObj = {
-                    leftName: leftData.leftName,
-                    leftY: this.state.leftY,
-                    leftScore: this.state.leftScore
-                }
-                window.localStorage.setItem('leftData', JSON.stringify(leftObj));
-                this.updateLeft()
-
-            }
-
+        }
         // Правый
-        // ВНИЗ!
-        if (e.keyCode === 40)
-            if (this.Rectangle.attrs.y < document.documentElement.clientHeight - this.Rectangle.attrs.height) {
-                this.Rectangle.to({
-                    y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
-                })
-                rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
-                }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
-                this.updateRight()
-            }
-        // ВВЕРХ!
-        if (e.keyCode === 38)
-            if (this.Rectangle.attrs.y > 0) {
-                this.Rectangle.to({
-                    y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
-                    duration: 0.06
-                })
-                this.setState({
-                    rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
-                })
-                rightObj = {
-                    rightName: rightData.rightName,
-                    rightY: this.state.rightY,
-                    rightScore: this.state.rightScore
-                }
-                window.localStorage.setItem('rightData', JSON.stringify(rightObj));
-                this.updateRight()
-            }
+        if (this.state.player === 0 || this.state.player === 2) {
+            // ВНИЗ!
+            if (e.keyCode === 40)
+                if (this.Rectangle.attrs.y < 720 - this.Rectangle.attrs.height) {
+                    this.Rectangle.to({
+                        y: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        rightY: this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3
+                    })
+                    this.updateRight(this.Rectangle.attrs.y + this.Rectangle.attrs.height / 3)
+                };
+            // ВВЕРХ!
+            if (e.keyCode === 38)
+                if (this.Rectangle.attrs.y > 0) {
+                    this.Rectangle.to({
+                        y: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3,
+                        duration: 0.06
+                    })
+                    this.setState({
+                        rightY: this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3
+                    })
+                    this.updateRight(this.Rectangle.attrs.y - this.Rectangle.attrs.height / 3)
+                };
+        };
+    }
+
+    handlePlayVsAi = (e) => {
+        e.preventDefault();
+
+        this.setState({
+            botActive: !this.state.botActive,
+            player: 3
+        })
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
     };
 
+    handleHotseat = (e) => {
+        e.preventDefault();
+        this.setState({
+            player: 0
+        })
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
+    };
+
+    handleOnline = (e) => {
+        e.preventDefault();
+        this.ws.send(JSON.stringify(1));
+        this.setState({
+            player: 2
+        })
+        let tmp = document.getElementById('alpha');
+        tmp.remove();
+    };
+    restart = () => {
+
+        this.setState({
+            leftScore: 0,
+            rightScore: 0,
+            isPlaying: false,
+            botActive: false,
+            leftY: leftData.leftY,
+            rightY: rightData.rightY,
+            ballX: 1280 / 2 - 5,
+            ballY: 720 / 2 - 5,
+        })
+        let obj = {
+            leftScore: 0,
+            rightScore: 0,
+            isPlaying: false,
+            botActive: false,
+            leftY: 720 / 2 - 45,
+            rightY: 720 / 2 - 45,
+            ballX: 1280 / 2 - 5,
+            ballY: 720 / 2 - 5,
+        }
+        if (!this.ws.readyState) {
+            setTimeout(function () {
+                this.ws.send(JSON.stringify(obj));
+            }, 100);
+        } else {
+            this.ws.send(JSON.stringify(obj));
+        }
+    }
     render() {
         return (
-            <div tabIndex='1' onKeyDown={this.handleKeyDown}>
-                <Stage width={document.documentElement.clientWidth} height={document.documentElement.clientHeight} >
-                    <Layer>
-                        <Rect
-                            x={0}
-                            y={0}
-                            width={document.documentElement.clientWidth}
-                            height={document.documentElement.clientHeight}
-                            fill='green'
-                        />
-                        <Rect
-                            x={document.documentElement.clientWidth / 2 - 10}
-                            y={0}
-                            width={10}
-                            height={document.documentElement.clientHeight}
-                            fill='white'
-                            opacity={0.8}
-                        />
-                    </Layer>
-                    <Layer key="ballLayer">
-                        <Circle
-                            ref={node => {
-                                this.Circle = node;
-                            }}
-                            x={this.state.ballX}
-                            y={this.state.ballY}
-                            radius={16}
-                            fill="white"
-                        />
-                        <Rect
-                            id='leftPlayer'
-                            ref={node => {
-                                this.Rect = node;
-                            }}
-                            x={20}
-                            y={this.state.leftY}
-                            width={15}
-                            height={90}
-                            fill='black'
-                            onKeyDown={this.handleKeyDown}
-                        />
-                        <Rect
-                            id='rightPlayer'
-                            ref={node => {
-                                this.Rectangle = node;
-                            }}
-                            x={document.documentElement.clientWidth - 35}
-                            y={this.state.rightY}
-                            width={15}
-                            height={90}
-                            fill='black'
-                        />
-                    </Layer>
-                    <Layer>
-                        <Label>
-                            <Text
-                                x={document.documentElement.clientWidth / 2 - 120}
-                                fontSize={90}
-                                text={`${this.state.leftScore}`}
-                                wrap="char"
-                                align="center"
+            <div>
+                <form id='alpha' className='settings'>
+                    <button onClick={this.handlePlayVsAi}
+                        className='UI'> Player vs AI</button>
+                    <button onClick={this.handleHotseat}
+                        className='UI'> Hotseat</button>
+                    <button onClick={this.handleOnline}
+                        className='UI'> Online</button>
+                </form>
+                < div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
+                    <Stage width={1280} height={720} >
+                        <Layer>
+                            <Rect
+                                x={0}
+                                y={0}
+                                width={1280}
+                                height={720}
+                                fill='green'
                             />
-                            <Text
-                                x={document.documentElement.clientWidth / 2 - 43}
-                                fontSize={90}
-                                text=' : '
-                                wrap="char"
-                                align="center"
+                            <Rect
+                                x={1280 / 2 - 10}
+                                y={0}
+                                width={10}
+                                height={720}
+                                fill='white'
+                                opacity={0.8}
                             />
-                            <Text
-                                x={document.documentElement.clientWidth / 2 + 30}
-                                fontSize={90}
-                                text={`${this.state.rightScore}`}
-                                wrap="char"
-                                align="center"
+                        </Layer>
+                        <Layer key="ballLayer">
+                            <Circle
+                                ref={node => {
+                                    this.Circle = node;
+                                }}
+                                x={this.state.ballX}
+                                y={this.state.ballY}
+                                radius={10}
+                                fill="white"
                             />
-                        </Label>
-                    </Layer>
-                </Stage >
-            </div>
+                            <Rect
+                                id='leftPlayer'
+                                ref={node => {
+                                    this.Rect = node;
+                                }}
+                                x={20}
+                                y={this.state.leftY}
+                                width={15}
+                                height={90}
+                                fill={(this.state.player === 1) ? 'blue' : 'black'}
+                                onKeyDown={this.handleKeyDown}
+                            />
+                            <Rect
+                                id='rightPlayer'
+                                ref={node => {
+                                    this.Rectangle = node;
+                                }}
+                                x={1280 - 35}
+                                y={this.state.rightY}
+                                width={15}
+                                height={90}
+                                fill={(this.state.player === 2) ? 'blue' : 'black'}
+                            />
+                        </Layer>
+                        <Layer>
+                            <Label>
+                                <Text
+                                    x={1280 / 2 - 120}
+                                    fontSize={90}
+                                    text={`${this.state.leftScore}`}
+                                    wrap="char"
+                                    align="center"
+                                />
+                                <Text
+                                    x={1280 / 2 - 43}
+                                    fontSize={90}
+                                    text=' : '
+                                    wrap="char"
+                                    align="center"
+                                />
+                                <Text
+                                    x={1280 / 2 + 30}
+                                    fontSize={90}
+                                    text={`${this.state.rightScore}`}
+                                    wrap="char"
+                                    align="center"
+                                />
+                            </Label>
+                        </Layer>
+                    </Stage >
+                </div >
+                <button className='restart' onClick={this.restart}>Restart</button>
+            </div >
         );
     }
 }
