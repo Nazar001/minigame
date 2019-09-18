@@ -50,6 +50,13 @@ class PongPage extends Component {
                 };
             }
         };
+        if ((this.state.player === 1 || this.restart.player === 2 ) && (this.state.leftScore === 0 && this.state.leftScore === 0 && this.state.isPlaying === false)){
+            if (this.state.player === 1) {
+                alert("Вы играете за игрока слева");
+            } else {
+                alert("Вы играете за игрока справа");
+            }
+        };
 
         this.ws.onclose = () => {
             console.log('disconnected')
@@ -374,7 +381,6 @@ class PongPage extends Component {
                     <button onClick={this.handleOnline}
                         className='UI'> Online</button>
                 </form>
-                <div className="text">{(this.state.player === 2 || this.state.player === 1) ? ('You are ' + this.state.player + ' player') : (' ')}</div>
                 < div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
                     <Stage width={1280} height={720} >
                         <Layer>
@@ -413,7 +419,7 @@ class PongPage extends Component {
                                 y={this.state.leftY}
                                 width={15}
                                 height={90}
-                                fill='black'
+                                fill={(this.state.player === 1) ? 'blue' : 'black'}
                                 onKeyDown={this.handleKeyDown}
                             />
                             <Rect
@@ -425,7 +431,7 @@ class PongPage extends Component {
                                 y={this.state.rightY}
                                 width={15}
                                 height={90}
-                                fill='black'
+                                fill={(this.state.player === 2) ? 'blue' : 'black'}
                             />
                         </Layer>
                         <Layer>
