@@ -32,19 +32,20 @@ class PongPage extends Component {
     ws = new WebSocket(URL)
 
     componentDidMount() {
+        document.title = "PingPong";
         this.ws.onopen = () => {
             console.log('connected')
         };
         this.ws.onmessage = evt => {
             const message = JSON.parse(evt.data)
-            if (message === 2) {
-                if (this.state.player === 1) {
+            if (message === 1) {
+                if (this.state.player === 2) {
                     this.setState({
-                        player: 2
+                        player: 1
                     })
                 };
             } else {
-                if (  this.state.player === 2) {
+                if (this.state.player === 1 || this.state.player === 2) {
                     this.up(message);
                 };
             }
@@ -325,9 +326,9 @@ class PongPage extends Component {
 
     handleOnline = (e) => {
         e.preventDefault();
-        this.ws.send(JSON.stringify(2));
+        this.ws.send(JSON.stringify(1));
         this.setState({
-            player: 1
+            player: 2
         })
         let tmp = document.getElementById('alpha');
         tmp.remove();
@@ -373,7 +374,7 @@ class PongPage extends Component {
                     <button onClick={this.handleOnline}
                         className='UI'> Online</button>
                 </form>
-                <text>{(this.state.player === 2 || this.state.player === 1) ? ('You are ' + this.state.player + ' player') : (' ')}</text>
+                <div className="text">{(this.state.player === 2 || this.state.player === 1) ? ('You are ' + this.state.player + ' player') : (' ')}</div>
                 < div className='gameField' tabIndex='1' onKeyDown={this.handleKeyDown}>
                     <Stage width={1280} height={720} >
                         <Layer>
