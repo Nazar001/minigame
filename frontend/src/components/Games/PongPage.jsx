@@ -3,6 +3,7 @@ import { withRouter } from "react-router";
 import './PongPage.scss';
 import { Stage, Layer, Rect, Circle, Text, Label } from 'react-konva';
 import { message } from 'antd';
+import MIDISounds from 'midi-sounds-react';
 
 let address = document.URL;
 address = address.replace("http", "ws");
@@ -258,8 +259,11 @@ class PongPage extends Component {
         if (a.attrs.x + a.attrs.radius > b.attrs.x &&
             a.attrs.x < b.attrs.x + b.attrs.width &&
             a.attrs.y + a.attrs.radius > b.attrs.y &&
-            a.attrs.y < b.attrs.y + b.attrs.height)
+            a.attrs.y < b.attrs.y + b.attrs.height) {
+            this.midiSounds.playChordNow(3, [60], 2.5);
+
             return true;
+        }
         else
             return false;
     }
@@ -418,6 +422,7 @@ class PongPage extends Component {
                         className='UI'> Online</button>
                 </form>
                 < div className='gameField' id="gameField" tabIndex='1' onKeyDown={this.handleKeyDown}>
+                    <MIDISounds ref={(ref) => (this.midiSounds = ref)} appElementName="root" instruments={[3]} />
                     <Stage width={1280} height={720} >
                         <Layer>
                             <Rect
@@ -451,7 +456,7 @@ class PongPage extends Component {
                                 ref={node => {
                                     this.Rect = node;
                                 }}
-                                x={20}
+                                x={31}
                                 y={this.state.leftY}
                                 width={15}
                                 height={90}
@@ -463,7 +468,7 @@ class PongPage extends Component {
                                 ref={node => {
                                     this.Rectangle = node;
                                 }}
-                                x={1280 - 35}
+                                x={1280 - 46}
                                 y={this.state.rightY}
                                 width={15}
                                 height={90}
@@ -496,6 +501,7 @@ class PongPage extends Component {
                             </Label>
                         </Layer>
                     </Stage >
+
                 </div >
                 <div className="div-btn">
                     <button className='restart btn' onClick={this.restart}>Restart</button>
