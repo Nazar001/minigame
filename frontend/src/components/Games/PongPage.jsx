@@ -83,8 +83,6 @@ class PongPage extends Component {
         }
     };
 
-
-
     updateRight = (message) => {
         if (this.state.player === 1 || this.state.player === 2) {
             let obj = {
@@ -260,7 +258,8 @@ class PongPage extends Component {
             a.attrs.x < b.attrs.x + b.attrs.width &&
             a.attrs.y + a.attrs.radius > b.attrs.y &&
             a.attrs.y < b.attrs.y + b.attrs.height) {
-            this.midiSounds.playChordNow(3, [60], 2.5);
+            this.midiSounds.playSnapNow(3, [47   ], 2.5)
+
 
             return true;
         }
@@ -422,7 +421,7 @@ class PongPage extends Component {
                         className='UI'> Online</button>
                 </form>
                 < div className='gameField' id="gameField" tabIndex='1' onKeyDown={this.handleKeyDown}>
-                    <MIDISounds ref={(ref) => (this.midiSounds = ref)} appElementName="root" instruments={[3]} />
+                    <MIDISounds className='support' ref={(ref) => (this.midiSounds = ref)} appElementName="root" instruments={[3]} />
                     <Stage width={1280} height={720} >
                         <Layer>
                             <Rect
