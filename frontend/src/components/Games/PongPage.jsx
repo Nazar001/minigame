@@ -55,7 +55,7 @@ class PongPage extends Component {
                     window.location.reload();
                 }, 3000);
             } else if (message1 === 504) {
-                alert("You lose!!!");
+                message.error("You lose!!!");
                 setTimeout(() => {
                     window.location.reload();
                 }, 3000);
@@ -216,11 +216,11 @@ class PongPage extends Component {
             };
 
             if (this.state.leftScore === 21) {
-                alert(this.state.leftName + ' wins')
+                message.success(this.state.leftName + ' wins')
                 clearInterval(temp);
             }
             else if (this.state.rightScore === 21) {
-                alert(this.state.rightName + ' wins')
+                message.success(this.state.rightName + ' wins')
                 clearInterval(temp);
             };
 
@@ -258,9 +258,7 @@ class PongPage extends Component {
             a.attrs.x < b.attrs.x + b.attrs.width &&
             a.attrs.y + a.attrs.radius > b.attrs.y &&
             a.attrs.y < b.attrs.y + b.attrs.height) {
-            this.midiSounds.playSnapNow(3, [47   ], 2.5)
-
-
+            this.midiSounds.playSnapNow(3, [1], 2.5)
             return true;
         }
         else
